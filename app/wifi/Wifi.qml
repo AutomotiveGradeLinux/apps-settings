@@ -321,8 +321,6 @@ SettingPage {
                         connectButton.visible = false
                         passwordValidateButton.visible = true
 
-                        System.showKeyboard = visible
-
                         //passwordInputText.o
                         periodicRefresh.stop()
 
@@ -355,7 +353,6 @@ SettingPage {
                         //passwordInputText = ""
                         var passkey = passwordInputText.text.valueOf()
                         console.log("Validating", passkey)
-                        System.showKeyboard = false
 
                         console.log("Passkey is", passkey)
                         request(wifiAPIpath + 'security?passkey=' + passkey,
@@ -367,8 +364,6 @@ SettingPage {
                         passwordValidateButton.visible = false
                         passwordInputText.visible = false
                         connectButton.visible = true
-
-                        keyboard.currentString = ""
 
                         periodicRefresh.start()
                     }
@@ -386,7 +381,8 @@ SettingPage {
 
                 width: connectButton.width
                 visible: false
-                text: keyboard.currentString
+                text: "password"
+                /*hardcore until virtual keyboard works*/
             }
         }
     }
