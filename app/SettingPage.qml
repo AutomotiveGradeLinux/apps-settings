@@ -29,6 +29,10 @@ Page {
         parent.pop()
     }
 
+    function setStatusIcon(index, icon) {
+        dbus.setStatusIcon(index, icon)
+    }
+
     Connections {
         target: root
         onCheckedChanged: {

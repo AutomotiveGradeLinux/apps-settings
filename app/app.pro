@@ -1,5 +1,5 @@
 TARGET = settings
-QT = quickcontrols2
+QT = quickcontrols2 dbus
 
 SOURCES = main.cpp
 

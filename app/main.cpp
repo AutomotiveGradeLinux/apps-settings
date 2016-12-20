@@ -17,6 +17,8 @@
 #include <QtCore/QDebug>
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QUrlQuery>
+#include <QtDBus/QDBusInterface>
+#include <QtDBus/QDBusReply>
 #include <QtGui/QGuiApplication>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlContext>
@@ -25,6 +27,23 @@
 #ifdef HAVE_LIBHOMESCREEN
 #include <libhomescreen.hpp>
 #endif
+
+class DBus : public QObject
+{
+    Q_OBJECT
+public:
+    DBus(QObject *parent = nullptr)
+        : QObject(parent)
+        , interface("org.agl.homescreen", "/StatusBar", "org.agl.statusbar", QDBusConnection::sessionBus())
+    {}
+
+    Q_INVOKABLE void setStatusIcon(int index, const QString &url) {
+        interface.call("setStatusIcon", index, url);
+    }
+
+private:
+    QDBusInterface interface;
+};
 
 int main(int argc, char *argv[])
 {
@@ -69,8 +88,12 @@ int main(int argc, char *argv[])
         QQmlContext *context = engine.rootContext();
         context->setContextProperty(QStringLiteral("bindingAddress"), bindingAddress);
     }
+
+    DBus dbus;
+    engine.rootContext()->setContextProperty("dbus", &dbus);
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));
 
     return app.exec();
 }
 
+#include "main.moc"

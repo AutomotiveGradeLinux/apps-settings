@@ -32,14 +32,32 @@ SettingPage {
         RowLayout {
             spacing: 20
             Button {
-                text: 'Sushi'
+                text: 'Wifi'
                 highlighted: true
+                property int index: 0
+                property var icons: ['HMI_Status_Wifi_NoBars-01', 'HMI_Status_Wifi_1Bar-01', 'HMI_Status_Wifi_2Bars-01', 'HMI_Status_Wifi_3Bars-01', 'HMI_Status_Wifi_Full-01']
+                onClicked: {
+                    index = (index + 1) % icons.length
+                    setStatusIcon(0, 'qrc:/images/Status/%1.png'.arg(icons[index]))
+                }
             }
             Button {
-                text: 'Sashimi'
+                text: 'Bluetooth'
+                property int index: 0
+                property var icons: ['HMI_Status_Bluetooth_Inactive-01', 'HMI_Status_Bluetooth_On-01']
+                onClicked: {
+                    index = (index + 1) % icons.length
+                    setStatusIcon(1, 'qrc:/images/Status/%1.png'.arg(icons[index]))
+                }
             }
             Button {
-                text: 'Ramen'
+                text: 'Signal'
+                property int index: 0
+                property var icons: ['HMI_Status_Signal_NoBars-01', 'HMI_Status_Signal_1Bars-01', 'HMI_Status_Signal_2Bars-01', 'HMI_Status_Signal_3Bars-01', 'HMI_Status_Signal_4Bars-01', 'HMI_Status_Signal_Full-01']
+                onClicked: {
+                    index = (index + 1) % icons.length
+                    setStatusIcon(2, 'qrc:/images/Status/%1.png'.arg(icons[index]))
+                }
             }
         }
 
