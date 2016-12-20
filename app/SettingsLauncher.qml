@@ -40,14 +40,14 @@ Page {
                     Layout.preferredWidth: 100
                     Layout.preferredHeight: 100
                     Image {
-                        anchors.centerIn: parent
+                        anchors.fill: parent
                         source: model.icon
                     }
                 }
                 Label {
                     Layout.fillWidth: true
                     text: model.title.toUpperCase()
-                    color: '#59FF7F'
+                    color: '#66FF99'
                 }
                 Switch {
                     id: checkedSwitch

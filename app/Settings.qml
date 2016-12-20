@@ -22,6 +22,7 @@ import 'datetime'
 import 'bluetooth'
 import 'wifi'
 import 'example'
+import 'version'
 
 ApplicationWindow {
     id: root
@@ -60,6 +61,8 @@ ApplicationWindow {
 
         Wifi {}
 
-        Example {}
+//        Example {}
+
+        Version {}
     }
 }

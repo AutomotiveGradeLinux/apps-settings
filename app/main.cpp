@@ -17,6 +17,7 @@
 #include <QtCore/QDebug>
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QUrlQuery>
+#include <QtCore/QFile>
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusReply>
 #include <QtGui/QGuiApplication>
@@ -89,6 +90,14 @@ int main(int argc, char *argv[])
         context->setContextProperty(QStringLiteral("bindingAddress"), bindingAddress);
     }
 
+    QFile version("/proc/version");
+    if (version.open(QFile::ReadOnly)) {
+        QStringList data = QString::fromLocal8Bit(version.readAll()).split(QLatin1Char(' '));
+        engine.rootContext()->setContextProperty("kernel", data.at(2));
+        version.close();
+    } else {
+        qWarning() << version.errorString();
+    }
     DBus dbus;
     engine.rootContext()->setContextProperty("dbus", &dbus);
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));

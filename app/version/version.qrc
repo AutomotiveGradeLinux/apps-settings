@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/version">
+        <file>Version.qml</file>
+        <file>images/icon.svg</file>
+        <file>images/agl_slide_0.png</file>
+    </qresource>
+</RCC>

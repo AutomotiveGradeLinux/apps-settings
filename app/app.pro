@@ -9,7 +9,8 @@ RESOURCES += \
     datetime/datetime.qrc \
     wifi/wifi.qrc \
     bluetooth/bluetooth.qrc \
-    example/example.qrc
+    example/example.qrc \
+    version/version.qrc
 
 
 include(app.pri)
