@@ -26,6 +26,11 @@ import 'example'
 ApplicationWindow {
     id: root
 
+    onVisibleChanged: {
+        if (!visible)
+            stack.pop(settings)
+    }
+
     StackView {
         id: stack
         anchors.fill: parent
