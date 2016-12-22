@@ -76,12 +76,10 @@ SettingPage {
         id: wifiDevice
         Rectangle {
             height: 120
-            width: parent.width
+            width: ListView.view.width
             color: "transparent"
             Image {
-
                 anchors.left: parent.left
-                anchors.leftMargin: 80
                 //width: 70
                 //height: 50
                 id: icon
@@ -110,14 +108,14 @@ SettingPage {
             Column {
                 anchors.left: icon.right
                 anchors.leftMargin: 5
-                Text {
+                Label {
                     id: networkNameText
                     text: name
                     color: '#66FF99'
                     font.pixelSize: 48
                     font.bold: serviceState === "ready" || serviceState === "online"
                 }
-                Text {
+                Label {
                     visible: serviceState === "ready" || serviceState === "online"
                     text: "connected, " + address
                     font.pointSize: 18
@@ -130,7 +128,6 @@ SettingPage {
                 anchors.top: parent.top
                 anchors.topMargin: 5
                 //anchors.horizontalCenter: networkNameText.horizontalCenter
-                anchors.rightMargin: 50
                 anchors.right: parent.right
                 width: 250
 
@@ -280,11 +277,8 @@ SettingPage {
 
     }
     ListView {
-        width: parent.width
-        anchors.top: parent.top
-        anchors.topMargin: 70
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 150
+        anchors.fill: parent
+        anchors.margins: 100
         model: networkList //WifiList {}
         delegate: wifiDevice
         clip: true
