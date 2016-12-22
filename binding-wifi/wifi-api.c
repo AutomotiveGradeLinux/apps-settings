@@ -272,6 +272,34 @@ void wifi_scanResult(struct afb_req request) /*AFB_SESSION_CHECK*/
 			/*input each scan result into my_array*/
 			json_object_array_add(my_array, jresp);
 			number += 1;
+
+                        //set the HMI icon according to strength, only if "ready" or "online"
+
+                        int error = 0;
+                        struct wifiStatus *status;
+
+                        status = g_try_malloc0(sizeof(struct wifiStatus));
+                        error = wifi_state(status); /*get current status of power and connection*/
+                        if (!error) {
+
+                            if (status->connected == 1) {
+
+                               if ((strcmp(state, "ready") == 0)
+                                    || ((strcmp(state, "online") == 0))) {
+
+                                    if (strength < 30)
+                                        setHMIStatus(BAR_1);
+                                    else if (strength < 50)
+                                        setHMIStatus(BAR_2);
+                                    else if (strength < 70)
+                                        setHMIStatus(BAR_3);
+                                    else
+                                        setHMIStatus(BAR_FULL);
+                               }
+                            } else
+                              setHMIStatus(BAR_NO);
+                      }
+
 		}
 		while (list != NULL) {
 			printf("Should be freed");

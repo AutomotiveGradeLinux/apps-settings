@@ -350,5 +350,40 @@ void registerPasskey(gchar *passkey) {
 	printf("Passkey: %s\n", passkey);
 	sendPasskey(passkey);
 
+
+}
+
+GError* setHMIStatus(enum wifiStates state) {
+
+    gchar *iconString = NULL;
+    GDBusConnection *connection;
+    GVariant *params = NULL;
+    GVariant *message = NULL;
+    GError *error = NULL;
+
+    if (state==BAR_NO) iconString = "qrc:/images/Status/HMI_Status_Wifi_NoBars-01.png";
+    else if (state==BAR_1) iconString = "qrc:/images/Status/HMI_Status_Wifi_1Bar-01.png";
+    else if (state==BAR_2) iconString = "qrc:/images/Status/HMI_Status_Wifi_2Bars-01.png";
+    else if (state==BAR_3) iconString = "qrc:/images/Status/HMI_Status_Wifi_3Bars-01.png";
+    else if (state==BAR_FULL) iconString = "qrc:/images/Status/HMI_Status_Wifi_Full-01.png";
+    else iconString = "qrc:/images/Status/HMI_Status_Wifi_NoBars-01.png";
+
+    connection = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
+
+    params = g_variant_new("(is)", HOMESCREEN_WIFI_ICON_POSITION, iconString);
+
+    message = g_dbus_connection_call_sync(connection, HOMESCREEN_SERVICE,
+    HOMESCREEN_ICON_PATH, HOMESCREEN_ICON_INTERFACE, "setStatusIcon", params,
+            NULL, G_DBUS_CALL_FLAGS_NONE,
+            DBUS_REPLY_TIMEOUT, NULL, &error);
+
+    if (error) {
+        printf("error: %s\n", error->message);
+
+        return error;
+    } else {
+        return NULL;
+    }
+
 }
 

@@ -52,6 +52,12 @@ extern "C" {
 #define WIFI_MAX_PSK_PASSPHRASE_LEN			65
 #define WIFI_MAX_WEP_KEY_LEN				26
 
+#define HOMESCREEN_SERVICE				"org.agl.homescreen"
+#define HOMESCREEN_ICON_INTERFACE		"org.agl.statusbar"
+#define HOMESCREEN_ICON_PATH			"/StatusBar"
+#define HOMESCREEN_WIFI_ICON_POSITION		0
+
+
 #define AGENT_PATH "/net/connman/Agent"
 #define AGENT_SERVICE "org.agent"
 
@@ -96,6 +102,8 @@ struct wifi_profile_info{
 	struct wifi_net wifiNetwork;
 };
 
+enum wifiStates {BAR_NO, BAR_1, BAR_2, BAR_3, BAR_FULL};
+
 //typedef void(*callback)(void);
 typedef void(*callback)(int password_rejected_flag);
 void register_callback(callback ptr);
@@ -113,6 +121,7 @@ GError* do_disconnectNetwork(gchar *object);
 GError* create_agent(GDBusConnection *connection);
 GError* stop_agent(GDBusConnection *connection);
 
+GError* setHMIStatus(enum wifiStates);
 
 void registerPasskey(gchar *object);
 GError* sendPasskey(gchar *object);
