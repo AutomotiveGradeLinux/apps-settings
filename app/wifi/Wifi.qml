@@ -25,12 +25,7 @@ SettingPage {
     title: 'Wifi'
     checkable: true
 
-    property string protocol: 'http://'
-    property string ipAddress: '127.0.0.1'
-    property string portNumber: Qt.application.arguments[1]
-    property string tokenString: Qt.application.arguments[2]
-    property string wifiAPI: '/api/wifi-manager/'
-    property string wifiAPIpath: protocol + ipAddress + ':' + portNumber + wifiAPI
+    property string wifiAPIpath: bindingAddress + '/wifi-manager/'
 
     Text {
         id: log
