@@ -303,9 +303,8 @@ SettingPage {
                 console.log(o.responseText)
 
                 // translate response into object
-                var jsonObject = eval('(' + o.responseText + ')')
-                var jsonObjectNetworks = eval('(' + JSON.stringify(
-                                                  jsonObject.response) + ')')
+                var jsonObject = JSON.parse(o.responseText)
+                var jsonObjectNetworks = jsonObject.response
                 console.log("WiFi list refreshed")
                 //console.log(jsonObject.response)
                 for (var i = 0; i < jsonObjectNetworks.length; i++) {
