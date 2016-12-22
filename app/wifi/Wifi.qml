@@ -84,24 +84,19 @@ SettingPage {
                 //height: 50
                 id: icon
                 source: {
+                    var svg
+                    if (strength < 30)
+                        svg = "1Bar"
+                    else if (strength < 50)
+                        svg = "2Bars"
+                    else if (strength < 70)
+                        svg = "3Bars"
+                    else
+                        svg = "Full"
                     if (securityType(security) === "unsecured") {
-                        if (strength < 30)
-                            return "images/HMI_Settings_Wifi_1Bar.svg"
-                        else if (strength < 50)
-                            return "images/HMI_Settings_Wifi_2Bars.svg"
-                        else if (strength < 70)
-                            return "images/HMI_Settings_Wifi_3Bars.svg"
-                        else
-                            return "images/HMI_Settings_Wifi_Full.svg"
+                        return 'images/HMI_Settings_Wifi_%1.svg'.arg(svg)
                     } else {
-                        if (strength < 30)
-                            return "images/HMI_Settings_Wifi_Locked_1Bar.svg"
-                        else if (strength < 50)
-                            return "images/HMI_Settings_Wifi_Locked_2Bars.svg"
-                        else if (strength < 70)
-                            return "images/HMI_Settings_Wifi_Locked_3Bars.svg"
-                        else
-                            return "images/HMI_Settings_Wifi_Locked_Full.svg"
+                        return 'images/HMI_Settings_Wifi_Locked_%1.svg'.arg(svg)
                     }
                 }
             }
