@@ -17,6 +17,7 @@
 import QtQuick 2.6
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.0
+import AGL.Demo.Controls 1.0
 import '..'
 
 SettingPage {
@@ -74,10 +75,9 @@ SettingPage {
 
     Component {
         id: wifiDevice
-        Rectangle {
+        MouseArea {
             height: 120
             width: ListView.view.width
-            color: "transparent"
             Image {
                 anchors.left: parent.left
                 //width: 70
@@ -118,145 +118,46 @@ SettingPage {
                     //font.italic: true
                 }
             }
-            Button {
-                id: connectButton
-                anchors.top: parent.top
-                anchors.topMargin: 5
-                //anchors.horizontalCenter: networkNameText.horizontalCenter
-                anchors.right: parent.right
-                width: 250
 
-                MouseArea {
-                    anchors.fill: parent
+            onClicked: {
+                //connectButton.border.color = "steelblue"
+                if ((serviceState === "ready")
+                        || serviceState === "online") {
 
-                    Text {
-                        anchors.fill: parent
-                        id: buttonTextLabel
-                        font.pixelSize: 15
-                        font.bold: true
-                        color: "black"
-                        verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: Text.AlignHCenter
-                        text: (serviceState === "ready" || serviceState === "online") ? 'Forget' : 'Connect'
-                    }
+                    //means we are connected
+                    console.log("Disconnecting from", index, " ,", name)
+                    request(wifiAPIpath + 'disconnect?network=' + index,
+                            function (o) {
 
-                    onClicked: {
-
-                        //connectButton.border.color = "steelblue"
-                        if ((serviceState === "ready")
-                                || serviceState === "online") {
-
-                            //means we are connected
-                            console.log("Disconnecting from", index, " ,", name)
-                            request(wifiAPIpath + 'disconnect?network=' + index,
-                                    function (o) {
-
-                                        //showRequestInfo(o.responseText)
-                                        console.log(o.responseText)
-                                    })
-                        } else {
-                            console.log("Conect to", index, " ,", name)
-
-                            //passwordDialog.open()
-                            request(wifiAPIpath + 'connect?network=' + index,
-                                    function (o) {
-
-                                        // log the json response
-                                        //showRequestInfo(o.responseText)
-                                        console.log(o.responseText)
-                                    })
-                        }
-                    }
-                }
-            }
-
-            Button {
-                id: passwordButton
-                anchors.top: parent.top
-                anchors.topMargin: 5
-                anchors.right: connectButton.right
-                width: 40
-                visible: (securityType(security) === "unsecured") ? false : true
-
-                text: "Key"
-
-                MouseArea {
-                    anchors.fill: parent
-
-                    onClicked: {
-
-                        //connectButton.border.color = "steelblue"
-                        passwordInputText.visible = true
-                        connectButton.visible = false
-                        passwordValidateButton.visible = true
-
-                        //passwordInputText.o
-                        periodicRefresh.stop()
-
-                        var passkey = passwordInputText.text.valueOf()
-
-                        //var passkey = 'randompassword'
-                        console.log("Disconnecting from", index, " ,", name)
-                    }
-                }
-            }
-
-            Button {
-                id: passwordValidateButton
-                anchors.top: parent.top
-                anchors.topMargin: 5
-                anchors.right: parent.right
-                anchors.rightMargin: connectButton.width + 5
-                width: 40
-                visible: false
-
-                //anchors.rightMargin: connectButton.width + 5
-                //buttonText: "Connect"
-                text: "ok" //or some icon?
-
-                MouseArea {
-                    anchors.fill: parent
-
-                    onClicked: {
-                        //passwordInputText = ""
-                        var passkey = passwordInputText.text.valueOf()
-                        console.log("Validating", passkey)
-
-                        console.log("Passkey is", passkey)
-                        request(wifiAPIpath + 'security?passkey=' + passkey,
+                                //showRequestInfo(o.responseText)
+                                console.log(o.responseText)
+                            })
+                } else {
+                    console.log("Conect to", index, " ,", name)
+                    view.currentIndex = model.index
+                    if (securityType(security) === "unsecured") {
+                        request(wifiAPIpath + 'connect?network=' + view.currentIndex,
                                 function (o) {
 
+                                    // log the json response
                                     //showRequestInfo(o.responseText)
                                     console.log(o.responseText)
                                 })
-                        passwordValidateButton.visible = false
-                        passwordInputText.visible = false
-                        connectButton.visible = true
-
-                        periodicRefresh.start()
+                    } else {
+                        dialog.visible = true
                     }
                 }
             }
 
-            TextInput {
-                id: passwordInputText
-                anchors.top: parent.top
-                anchors.topMargin: 10
-                anchors.right: parent.right
-                anchors.rightMargin: 0
-                readOnly: false
-                //horizontalAlignment: TextInput.AlignHCenter
-                //verticalAlignment: TextInput.AlignVCenter
+//            ImageButton {
+//                anchors.verticalCenter: parent.verticalCenter
+//                anchors.right: parent.right
+//                offImage: '../images/HMI_Settings_X.svg'
+//                onClicked: {
 
+//                }
+//            }
 
-                font.pointSize: 15
-                color: "#ffffff"
-
-                width: connectButton.width
-                visible: false
-                text: "password"
-                /*hardcore until virtual keyboard works*/
-            }
 
             Image {
                 source: '../images/HMI_Settings_DividingLine.svg'
@@ -266,12 +167,11 @@ SettingPage {
 
                 visible: model.index > 0
             }
-
         }
-
-
     }
+
     ListView {
+        id: view
         anchors.fill: parent
         anchors.margins: 100
         model: networkList //WifiList {}
@@ -279,11 +179,68 @@ SettingPage {
         clip: true
     }
 
+    MouseArea {
+        id: dialog
+        anchors.fill: parent
+        visible: false
+        z: 1
+        onVisibleChanged: if (visible) password.forceActiveFocus()
+        ColumnLayout {
+            anchors.fill: parent
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredHeight: 1
+                Rectangle {
+                    anchors.fill: parent
+                    color: 'black'
+                    opacity: 0.5
+                }
+                RowLayout {
+                    anchors.centerIn: parent
+                    TextField {
+                        id: password
+                        placeholderText: 'Password'
+                    }
+                    Button {
+                        text: 'Connect'
+                        highlighted: true
+                        onClicked: {
+                            var passkey = password.text
+                            console.log("Validating", passkey)
+
+                            console.log("Passkey is", passkey)
+                            request(wifiAPIpath + 'security?passkey=' + passkey,
+                                    function (o) {
+
+                                        //showRequestInfo(o.responseText)
+                                        console.log(o.responseText)
+                                    })
+                            dialog.visible = false
+                        }
+                    }
+                    Button {
+                        text: 'Cancel'
+                        onClicked: dialog.visible = false
+                    }
+                }
+            }
+
+            Keyboard {
+                id: keyboard
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.preferredHeight: 1
+                target: activeFocusControl
+            }
+        }
+    }
 
     //Timer for periodic refresh; this is BAD solution, need to figure out how to subscribe for events
     Timer {
         id: periodicRefresh
         interval: 1000 // 1second
+        running: !dialog.visible
         onTriggered: {
 
             networkList.clear()
