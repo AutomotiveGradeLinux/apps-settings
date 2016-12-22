@@ -66,96 +66,6 @@ SettingPage {
         id: networkList
     }
 
-    Rectangle {
-        id: buttonNetworkList
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.margins: 10
-        width: buttonNetworkListText.width + 10
-        height: buttonScanText.height + 10
-        border.width: buttonNetworkListMouseArea.pressed ? 2 : 1
-        radius: 5
-        antialiasing: true
-        color: "#222"
-        border.color: "white"
-        Text {
-            color: "white"
-            id: buttonNetworkListText
-            anchors.centerIn: parent
-            text: "GET NETWORK LIST"
-            font.pixelSize: 40
-        }
-        ListModel {
-            id: listModel
-        }
-        MouseArea {
-            id: buttonNetworkListMouseArea
-            anchors.fill: parent
-            onClicked: {
-                log.text = ""
-                console.log("\n")
-                networkList.clear()
-                request(wifiAPIpath + 'scan_result', function (o) {
-                    // log the json response
-                    console.log(o.responseText)
-                    // translate response into object
-                    var jsonObject = eval('(' + o.responseText + ')')
-                    var jsonObjectNetworks = eval(
-                                '(' + JSON.stringify(jsonObject.response) + ')')
-                    //console.log(jsonObject.response)
-                    for (var i = 0; i < jsonObjectNetworks.length; i++) {
-                        networkList.append({
-                                               number: jsonObjectNetworks[i].Number,
-                                               name: jsonObjectNetworks[i].ESSID,
-                                               strength: jsonObjectNetworks[i].Strength,
-                                               serviceState: jsonObjectNetworks[i].State,
-                                               security: jsonObjectNetworks[i].Security,
-                                               address: jsonObjectNetworks[i].IPAddress
-                                           })
-                        console.log(jsonObjectNetworks[i].Number,
-                                    jsonObjectNetworks[i].ESSID,
-                                    jsonObjectNetworks[i].Strength,
-                                    jsonObjectNetworks[i].State,
-                                    jsonObjectNetworks[i].Security,
-                                    jsonObjectNetworks[i].IPAddress)
-                    }
-                })
-            }
-        }
-    }
-    Rectangle {
-        id: buttonScan
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        anchors.margins: 80
-        width: buttonScanText.width + 10
-        height: buttonScanText.height + 10
-        border.width: mouseArea.pressed ? 2 : 1
-        //radius: 5
-        //antialiasing: true
-        //color: "black"
-        color: "#222"
-        border.color: "white"
-        Text {
-              id: buttonScanText
-              anchors.centerIn: parent
-              text: "SCAN"
-              color: "white"
-              font.pixelSize: 40
-        }
-        MouseArea {
-            id: mouseArea
-            anchors.fill: parent
-            onClicked: {
-                log.text = ""
-                console.log("\n")
-                request(wifiAPIpath + 'scan', function (o) {
-                    // log the json response
-                    console.log(o.responseText)
-                })
-            }
-        }
-    }
     function request(url, callback) {
         var xhr = new XMLHttpRequest()
         xhr.onreadystatechange = (function (myxhr) {
@@ -179,15 +89,15 @@ SettingPage {
     Component {
         id: wifiDevice
         Rectangle {
-            height: 150
+            height: 120
             width: parent.width
-            color: "#222"
+            color: "transparent"
             Image {
-                anchors.top: parent.top
-                anchors.topMargin: 7
+
                 anchors.left: parent.left
-                width: 70
-                height: 50
+                anchors.leftMargin: 80
+                //width: 70
+                //height: 50
                 id: icon
                 source: {
                     if (securityType(security) === "unsecured") {
@@ -213,10 +123,12 @@ SettingPage {
             }
             Column {
                 anchors.left: icon.right
-                anchors.leftMargin: 10
+                anchors.leftMargin: 5
                 Text {
+                    id: networkNameText
                     text: name
-                    font.pointSize: 30
+                    color: '#66FF99'
+                    font.pixelSize: 48
                     font.bold: {
                         if ((serviceState === "ready")
                                 || serviceState === "online")
@@ -224,28 +136,23 @@ SettingPage {
                         else
                             font.bold = false
                     }
-                    color: {
-                        if ((serviceState === "ready")
-                                || serviceState === "online")
-                            color = "#00ff00"
-                        else
-                            color = "#ffffff"
-                    }
                 }
                 Text {
                     visible: ((serviceState === "ready")
                               || serviceState === "online") ? true : false
                     text: "connected, " + address
                     font.pointSize: 18
-                    color: "#ffffff"
-                    font.italic: true
+                    color: "white"
+                    //font.italic: true
                 }
             }
             Button {
                 id: connectButton
                 anchors.top: parent.top
+                anchors.topMargin: 5
+                //anchors.horizontalCenter: networkNameText.horizontalCenter
+                anchors.rightMargin: 50
                 anchors.right: parent.right
-                anchors.rightMargin: 5
                 width: 250
 
                 MouseArea {
@@ -301,14 +208,13 @@ SettingPage {
             Button {
                 id: passwordButton
                 anchors.top: parent.top
-                anchors.right: parent.right
+                anchors.topMargin: 5
+                anchors.right: connectButton.right
                 width: 40
                 visible: (securityType(security) === "unsecured") ? false : true
 
-                //anchors.rightMargin: connectButton.width + 5
-                //buttonText: "Connect"
                 text: {
-                    "Key" //or some icon?
+                    "Key"
                 }
 
                 MouseArea {
@@ -335,6 +241,7 @@ SettingPage {
             Button {
                 id: passwordValidateButton
                 anchors.top: parent.top
+                anchors.topMargin: 5
                 anchors.right: parent.right
                 anchors.rightMargin: connectButton.width + 5
                 width: 40
@@ -373,8 +280,13 @@ SettingPage {
             TextInput {
                 id: passwordInputText
                 anchors.top: parent.top
+                anchors.topMargin: 10
                 anchors.right: parent.right
-                anchors.rightMargin: 5
+                anchors.rightMargin: 0
+                readOnly: false
+                //horizontalAlignment: TextInput.AlignHCenter
+                //verticalAlignment: TextInput.AlignVCenter
+
 
                 font.pointSize: 15
                 color: "#ffffff"
@@ -384,7 +296,19 @@ SettingPage {
                 text: "password"
                 /*hardcore until virtual keyboard works*/
             }
+
+            Image {
+                source: '../images/HMI_Settings_DividingLine.svg'
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: -15
+
+                visible: model.index > 0
+            }
+
         }
+
+
     }
     ListView {
         width: parent.width
@@ -396,6 +320,7 @@ SettingPage {
         delegate: wifiDevice
         clip: true
     }
+
 
     //Timer for periodic refresh; this is BAD solution, need to figure out how to subscribe for events
     Timer {
