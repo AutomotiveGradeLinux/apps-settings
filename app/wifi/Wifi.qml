@@ -399,7 +399,7 @@ SettingPage {
     //Timer for periodic refresh; this is BAD solution, need to figure out how to subscribe for events
     Timer {
         id: periodicRefresh
-        interval: 1000 // 1second
+        interval: 5000 // 5seconds
         onTriggered: {
 
             networkList.clear()
