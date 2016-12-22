@@ -25,12 +25,7 @@ SettingPage {
     title: 'Bluetooth'
     checkable: true
 
-    property string protocol: 'http://'
-    property string ipAddress: '127.0.0.1'
-    property string portNumber: Qt.application.arguments[1]
-    property string tokenString: Qt.application.arguments[2]
-    property string btAPI: '/api/Bluetooth-manager/'
-    property string btAPIpath: protocol + ipAddress + ':' + portNumber + btAPI
+    property string btAPIpath: bindingAddress + '/Bluetooth-manager/'
     property var jsonObjectBT
     property string currentState: 'idle'
     property string btState: 'off' //add property to indicate the bt status
