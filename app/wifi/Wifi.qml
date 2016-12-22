@@ -88,22 +88,22 @@ SettingPage {
                 source: {
                     if (securityType(security) === "unsecured") {
                         if (strength < 30)
-                            source = "images/HMI_Settings_Wifi_1Bar.svg"
-                        else if (strength >= 30 && strength < 50)
-                            source = "images/HMI_Settings_Wifi_2Bars.svg"
-                        else if (strength >= 50 && strength < 70)
-                            source = "images/HMI_Settings_Wifi_3Bars.svg"
+                            return "images/HMI_Settings_Wifi_1Bar.svg"
+                        else if (strength < 50)
+                            return "images/HMI_Settings_Wifi_2Bars.svg"
+                        else if (strength < 70)
+                            return "images/HMI_Settings_Wifi_3Bars.svg"
                         else
-                            source = "images/HMI_Settings_Wifi_Full.svg"
+                            return "images/HMI_Settings_Wifi_Full.svg"
                     } else {
                         if (strength < 30)
-                            source = "images/HMI_Settings_Wifi_Locked_1Bar.svg"
-                        else if (strength >= 30 && strength < 50)
-                            source = "images/HMI_Settings_Wifi_Locked_2Bars.svg"
-                        else if (strength >= 50 && strength < 70)
-                            source = "images/HMI_Settings_Wifi_Locked_3Bars.svg"
+                            return "images/HMI_Settings_Wifi_Locked_1Bar.svg"
+                        else if (strength < 50)
+                            return "images/HMI_Settings_Wifi_Locked_2Bars.svg"
+                        else if (strength < 70)
+                            return "images/HMI_Settings_Wifi_Locked_3Bars.svg"
                         else
-                            source = "images/HMI_Settings_Wifi_Locked_Full.svg"
+                            return "images/HMI_Settings_Wifi_Locked_Full.svg"
                     }
                 }
             }
@@ -115,17 +115,10 @@ SettingPage {
                     text: name
                     color: '#66FF99'
                     font.pixelSize: 48
-                    font.bold: {
-                        if ((serviceState === "ready")
-                                || serviceState === "online")
-                            font.bold = true
-                        else
-                            font.bold = false
-                    }
+                    font.bold: serviceState === "ready" || serviceState === "online"
                 }
                 Text {
-                    visible: ((serviceState === "ready")
-                              || serviceState === "online") ? true : false
+                    visible: serviceState === "ready" || serviceState === "online"
                     text: "connected, " + address
                     font.pointSize: 18
                     color: "white"
@@ -152,13 +145,7 @@ SettingPage {
                         color: "black"
                         verticalAlignment: Text.AlignVCenter
                         horizontalAlignment: Text.AlignHCenter
-                        text: {
-                            if ((serviceState === "ready")
-                                    || serviceState === "online")
-                                text = "Forget"
-                            else
-                                text = "Connect"
-                        }
+                        text: (serviceState === "ready" || serviceState === "online") ? 'Forget' : 'Connect'
                     }
 
                     onClicked: {
@@ -199,9 +186,7 @@ SettingPage {
                 width: 40
                 visible: (securityType(security) === "unsecured") ? false : true
 
-                text: {
-                    "Key"
-                }
+                text: "Key"
 
                 MouseArea {
                     anchors.fill: parent
@@ -235,9 +220,7 @@ SettingPage {
 
                 //anchors.rightMargin: connectButton.width + 5
                 //buttonText: "Connect"
-                text: {
-                    "ok" //or some icon?
-                }
+                text: "ok" //or some icon?
 
                 MouseArea {
                     anchors.fill: parent
