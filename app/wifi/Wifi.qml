@@ -27,15 +27,6 @@ SettingPage {
 
     property string wifiAPIpath: bindingAddress + '/wifi-manager/'
 
-    Text {
-        id: log
-        anchors.fill: parent
-        anchors.margins: 10
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        //text: "log"
-    }
-
     onCheckedChanged: {
         console.log("Wifi set to", checked)
         if (checked == true) {
