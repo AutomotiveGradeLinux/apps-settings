@@ -33,7 +33,6 @@ SettingPage {
     property string btAPIpath: protocol + ipAddress + ':' + portNumber + btAPI
     property var jsonObjectBT
     property string currentState: 'idle'
-    property string btState: 'off' //add property to indicate the bt status
 
     Text {
         id: log
@@ -54,9 +53,7 @@ SettingPage {
             request(btAPIpath + 'start_discovery', function (o) {
                console.log(o.responseText)
             })
-            buttonScan.text = "STOP"		//when power on and after send the discovery command, button set to STOP
             currentState = 'discovering'
-            btState = 'on'	//bt is on
             //search_device()
             periodicRefresh.start()
 
@@ -73,9 +70,7 @@ SettingPage {
                 //showRequestInfo(o.responseText)
                 console.log(o.responseText)
             })
-            buttonScan.text = "SEARCH"	//when power off the button should be set to SEARCH
             currentState = 'idle'
-            btState = 'off'	//bt off
         }
     }
 
@@ -96,7 +91,7 @@ SettingPage {
                     id: buttonScan
                     anchors.centerIn: parent
                     width: 100
-                    text: "SEARCH"	//default value is SEARCH
+                    text: "SEARCH"
 
                     MouseArea {
                         //id: mouseArea
@@ -104,18 +99,15 @@ SettingPage {
 
                         onClicked: {
                             if (buttonScan.text == "SEARCH"){
-                                if (btState == 'on'){	//only response to the requirement when bt is on
-                                    request(btAPIpath + 'start_discovery', function (o) {
+                                request(btAPIpath + 'start_discovery', function (o) {
 
                                     // log the json response
                                     //showRequestInfo(o.responseText)
                                     console.log(o.responseText)
                                 })
-                                    buttonScan.text = "STOP"
-                                    currentState = 'discovering'
-                                    periodicRefresh.start()
-                                }
-
+                                buttonScan.text = "CANCEL"
+                                currentState = 'discovering'
+                                periodicRefresh.start()
                             }else{
                                 request(btAPIpath + 'stop_discovery', function (o) {
 
@@ -148,154 +140,127 @@ SettingPage {
       Component {
          id:blueToothDevice
          Rectangle {
-         height: 120
+         height: 150
          width: parent.width
-         color: "transparent"
-             MouseArea {
-               anchors.fill: parent
-                 Column {
-                     anchors.left: parent.left
-                     anchors.leftMargin: 80
-                     Text {
-                        id: btName
-                        text: deviceName
-                        color: '#66FF99'
-                        font.pixelSize: 48
-                     }
-//                     Text {
-//                        id: btAddr
-//                        text: deviceAddress
-//                        font.pixelSize: 24
-//                        color: 'white'
-//                     }
-                     Text {
-                        text: {
-                          if ((devicePairable === "True")
-                                 && (deviceConnect === "False"))
-                                 text = "paired, "
-                          else if ((devicePairable === "True")
-                                   && (deviceConnect === "True")
-                                   && (connectAVP === "True")
-                                   && (connectHFP === "False"))
-                                   text = "AV Connection, "
-                          else if ((devicePairable === "True")
-                                    && (deviceConnect === "True")
-                                    && (connectHFP === "True")
-                                    && (connectAVP === "False"))
-                                    text = "Handsfree Connection, "
-                          else if ((devicePairable === "True")
-                                   && (deviceConnect === "True")
-                                   && (connectHFP === "True")
-                                   && (connectAVP === "True"))
-                                   text = "Handsfree & AV Connection, "
-                          else
-                             text = ""
-                          text = text + deviceAddress
-                        }
-                        font.pointSize: 18
-                        color: "#ffffff"
-                        font.italic: true
-                     }
-                     Text {
-                       id: btPairable
-                       text: devicePairable
-                       visible: false
-                     }
-                     Text {
-                       id: btConnectstatus
-                       text: deviceConnect
-                       visible: false
-                     }
+         color: "#222"
 
-                 }
-                 Button {
-                     id: removeButton
-                     anchors.top:parent.top
-                     anchors.topMargin: 15
-                     //anchors.horizontalCenter: btName.horizontalCenter
-                     anchors.right: parent.right
-                     anchors.rightMargin: 100
-
-                     text: "Unpair"
-                     MouseArea {
-                         anchors.fill: parent
-                         onClicked: {
-                             request(btAPIpath + 'remove_device?value=' + deviceAddress, function (o) {
-                                 console.log(o.responseText)
-                             })
-                             btDeviceList.remove(findDevice(deviceAddress))
-                         }
-                     }
-
-                 }
-
-                 Button {
-                  id: connectButton
-                  anchors.top:parent.top
-                  anchors.topMargin: 15
-                  //anchors.horizontalCenter: btName.horizontalCenter
-                  anchors.right: removeButton.left
-                  anchors.rightMargin: 10
-
-                  text:((connectHFP === "True") || (connectAVP === "True"))? "Disconnect":((btPairable.text == "True")? "Connect":"Pair")
-                  // only when HFP or AVP is connected, button will be shown as Disconnect
-		  MouseArea {
-                     anchors.fill: parent
-                     onClicked: {
-                        if (currentState == 'discovering'){
-                             request(btAPIpath + 'stop_discovery', function (o) {
-                               currentState = "idle"
-                               console.log(o.responseText)
-                             })
-                           }
-                        if (connectButton.text == "Pair"){
-                             connectButton.text = "Connect"
-                             request(btAPIpath + 'pair?value=' + deviceAddress, function (o) {
-                             btPairable.text = "True"
-                                console.log(o.responseText)
-                             })
-                             request(btAPIpath + 'set_property?Address=' + deviceAddress + '\&Property=Trusted\&value=true', function (o) {
-                                console.log(o.responseText)
-                             })
-                         }
-                         else if (connectButton.text == "Connect"){
-                                  connectButton.text = "Disconnect"
-                                  request(btAPIpath + 'connect?value=' + deviceAddress, function (o) {
-                                    console.log(o.responseText)
-                                  })
-                         }
-                         else if (connectButton.text == "Disconnect"){
-                                  request(btAPIpath + 'disconnect?value=' + deviceAddress, function (o) {
-                                    console.log(o.responseText)
-                                  })
-                                  connectButton.text = "Connect"
-                                  btDeviceList.remove(findDevice(deviceAddress))
-                          }
-                      }
-                    }
+         Column {
+             Text {
+                id: btName
+                text: deviceName
+                font.pointSize: 36
+                color: "#ffffff"
+             }
+             Text {
+                id: btAddr
+                text: deviceAddress
+                visible: false
+             }
+             Text {
+                text: {
+                  if ((devicePairable === "True")
+                         && (deviceConnect === "False"))
+                         text = "paired"
+                  else if ((devicePairable === "True")
+                           && (deviceConnect === "True")
+                           && (connectAVP) === "True")
+                           text = "AV Connection"
+                  else if ((devicePairable === "True")
+                            && (deviceConnect === "True")
+                            && (connectHFP) === "True")
+                            text = "Handsfree Connection"
+                  else
+                     text = ""
                 }
+                font.pointSize: 18
+                color: "#ffffff"
+                font.italic: true
+             }
+             Text {
+               id: btPairable
+               text: devicePairable
+               visible: false
+             }
+             Text {
+               id: btConnectstatus
+               text: deviceConnect
+               visible: false
              }
 
-             Image {
-                 source: '../images/HMI_Settings_DividingLine.svg'
-                 anchors.horizontalCenter: parent.horizontalCenter
-                 anchors.top: parent.top
-                 anchors.topMargin: -15
-
-                 visible: model.index > 0
+         }
+         Button {
+             id: removeButton
+             anchors.top:parent.top
+             anchors.topMargin: 15
+             anchors.right: parent.right
+             text: "Unpair"
+             MouseArea {
+                 anchors.fill: parent
+                 onClicked: {
+                     request(btAPIpath + 'remove_device?value=' + btAddr.text, function (o) {
+                         console.log(o.responseText)
+                     })
+                     btDeviceList.remove(findDevice(btAddr.text))
+                 }
              }
+
+         }
+
+         Button {
+          id: connectButton
+          anchors.top:parent.top
+          anchors.topMargin: 15
+          anchors.right: removeButton.left
+          anchors.rightMargin: 10
+
+          text:(btConnectstatus.text == "True")? "Disconnect":((btPairable.text == "True")? "Connect":"Pair")
+          MouseArea {
+             anchors.fill: parent
+             onClicked: {
+                if (currentState == 'discovering'){
+                     request(btAPIpath + 'stop_discovery', function (o) {
+                       currentState = "idle"
+                       console.log(o.responseText)
+                     })
+                   }
+                if (connectButton.text == "Pair"){
+                     connectButton.text = "Connect"
+                     request(btAPIpath + 'pair?value=' + btAddr.text, function (o) {
+                     btPairable.text = "True"
+                        console.log(o.responseText)
+                     })
+                     request(btAPIpath + 'set_property?Address=' + btAddr.text + '\&Property=Trusted\&value=true', function (o) {
+                        console.log(o.responseText)
+                     })
+                 }
+                 else if (connectButton.text == "Connect"){
+                          connectButton.text = "Disconnect"
+                          request(btAPIpath + 'connect?value=' + btAddr.text, function (o) {
+                            console.log(o.responseText)
+                          })
+                 }
+                 else if (connectButton.text == "Disconnect"){
+                          request(btAPIpath + 'disconnect?value=' + btAddr.text, function (o) {
+                            console.log(o.responseText)
+                          })
+                          connectButton.text = "Connect"
+                          btDeviceList.remove(findDevice(btAddr.text))
+                  }
+              }
+            }
           }
+        }
       }
 
       ListView {
-          width: parent.width
-          anchors.top: parent.top
-          anchors.topMargin: 70
-          anchors.bottom: parent.bottom
-          anchors.bottomMargin: 150
-          model: btDeviceList
-          delegate: blueToothDevice
-          clip: true
+                width: parent.width
+                anchors.top: parent.top
+                anchors.topMargin: 200
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 150
+                model: btDeviceList
+                delegate: blueToothDevice
+                clip: true
       }
 
       function findDevice(address){
