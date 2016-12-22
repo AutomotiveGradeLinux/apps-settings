@@ -337,7 +337,7 @@ SettingPage {
       //Timer for periodic refresh; this is BAD solution, need to figure out how to subscribe for events
       Timer {
                 id: periodicRefresh
-                interval: (currentState == "idle")? 10000:5000 // 5seconds
+                interval: (currentState == "idle")? 10000:1000 // 1second
                 onTriggered: {
 
                     btDeviceList.clear()
