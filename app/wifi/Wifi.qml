@@ -216,6 +216,15 @@ SettingPage {
                                         //showRequestInfo(o.responseText)
                                         console.log(o.responseText)
                                     })
+
+                            request(wifiAPIpath + 'connect?network=' + view.currentIndex,
+                                    function (o) {
+
+                                        // log the json response
+                                        //showRequestInfo(o.responseText)
+                                        console.log(o.responseText)
+                                    })
+
                             dialog.visible = false
                         }
                     }
@@ -268,3 +277,4 @@ SettingPage {
         }
     }
 }
+
