@@ -184,7 +184,14 @@ SettingPage {
         anchors.fill: parent
         visible: false
         z: 1
-        onVisibleChanged: if (visible) password.forceActiveFocus()
+        onVisibleChanged: {
+            if (visible) {
+                password.forceActiveFocus()
+            } else {
+                password.text = ''
+            }
+        }
+
         ColumnLayout {
             anchors.fill: parent
             Item {
