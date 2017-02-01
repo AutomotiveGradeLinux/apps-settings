@@ -32,10 +32,7 @@
 #include "wifi-api.h"
 #include "wifi-connman.h"
 
-/*
- * the interface to afb-daemon
- */
-const struct afb_binding_interface *afbitf;
+
 
 static int need_password_flag = 0;
 static int password_not_correct_flag = 0;
@@ -64,7 +61,7 @@ void wifi_passkey(struct afb_req request) {
     /* retrieves the argument, expects password string */
     passkey_from_user = afb_req_value(request, "passkey");
 
-    printf("Passkey inserted: %s\n", passkey_from_user);
+    NOTICE(afbitf, "Passkey inserted: %s\n", passkey_from_user);
 
     sendPasskey(passkey_from_user);
 
@@ -73,7 +70,7 @@ void wifi_passkey(struct afb_req request) {
 
         registerPasskey(passkey);
     } else {
-        printf("Please enter the password first\n");
+        NOTICE(afbitf, "Please enter the password first\n");
 
     }
 }
@@ -127,9 +124,8 @@ static void eventpush (struct afb_req request)
  *
  * */
 void ask_for_passkey(int number, const char* asciidata) {
-    //TODO: show network we are asking password for
-    printf("Insert passkey.\n");
-    ERROR(afbitf, "Insert passkey.");
+    NOTICE(afbitf, "Passkey for %s network needed.", asciidata);
+    NOTICE(afbitf, "Sending event.");
 
     json_object *jresp = json_object_new_object();
 
@@ -187,16 +183,12 @@ static void wifi_activate(struct afb_req request) /*AFB_SESSION_CHECK*/
 
 	if (ptr_my_callback == NULL) {
 
-		printf("Registering callback\n");
-
         ptr_my_callback = ask_for_passkey;
         register_callbackSecurity(ptr_my_callback);
 
 	}
 
     if (wifiListChanged_clbck == NULL) {
-
-        printf("Registering callback wifiListChanged_clbck \n");
 
         wifiListChanged_clbck = wifiListChanged;
         register_callbackWiFiList(wifiListChanged_clbck);
@@ -325,7 +317,8 @@ void wifi_scanResult(struct afb_req request) /*AFB_SESSION_CHECK*/
 			json_object_object_add(jresp, "IPAddress", jstring3);
 			json_object_object_add(jresp, "State", jstring4);
 
-            //printf("The object json: %s\n", json_object_to_json_string(jresp));
+            DEBUG(afbitf, "The object json: %s\n", json_object_to_json_string(jresp));
+
 			/*input each scan result into my_array*/
 			json_object_array_add(my_array, jresp);
 			number += 1;
@@ -359,7 +352,6 @@ void wifi_scanResult(struct afb_req request) /*AFB_SESSION_CHECK*/
 
 		}
 		while (list != NULL) {
-			printf("Should be freed");
 			holdMe = list->next;
 			g_free(list);
 			list = holdMe;
@@ -396,7 +388,8 @@ void wifi_connect(struct afb_req request) {
 
 	else {
 		network_index = atoi(network);
-		printf("Joining network number %d\n", network_index);
+        NOTICE(afbitf,"Joining network number %d\n", network_index);
+
 
 	}
 
@@ -405,17 +398,16 @@ void wifi_connect(struct afb_req request) {
 
 	if (item == NULL) {
 		//Index starts from 1
-		printf("Network with number %d not found.\n", network_index + 1);
+        ERROR(afbitf, "Network with number %d not found.\n", network_index + 1);
 		//TODO:better error message
 		afb_req_fail(request, "failed", "bad arguments");
 	}
 
 	else {
 		wifiProfileToConnect = (struct wifi_profile_info *) item;
-		printf("Name: %s, strength: %d, %s\n", wifiProfileToConnect->ESSID,
+        INFO(afbitf, "Name: %s, strength: %d, %s\n", wifiProfileToConnect->ESSID,
 				wifiProfileToConnect->Strength,
 				wifiProfileToConnect->NetworkPath);
-		//printf ("Connecting to %s\n",  wifiProfileToConnect->NetworkPath);
 	}
 	error = do_connectNetwork(wifiProfileToConnect->NetworkPath);
 
@@ -461,7 +453,7 @@ void wifi_disconnect(struct afb_req request) {
 
 	else {
 		network_index = atoi(network);
-		printf("Joining network number %d\n", network_index);
+        NOTICE(afbitf, "Joining network number %d\n", network_index);
 
 	}
 
@@ -470,17 +462,16 @@ void wifi_disconnect(struct afb_req request) {
 
 	if (item == NULL) {
 		//Index starts from 1
-		printf("Network with number %d not found.\n", network_index + 1);
+        ERROR(afbitf,"Network with number %d not found.\n", network_index + 1);
 		//TODO:better error message
 		afb_req_fail(request, "failed", "bad arguments");
 	}
 
 	else {
 		wifiProfileToConnect = (struct wifi_profile_info *) item;
-		printf("Name: %s, strength: %d, %s\n", wifiProfileToConnect->ESSID,
+        INFO(afbitf, "Name: %s, strength: %d, %s\n", wifiProfileToConnect->ESSID,
 				wifiProfileToConnect->Strength,
 				wifiProfileToConnect->NetworkPath);
-		//printf ("Connecting to %s\n",  wifiProfileToConnect->NetworkPath);
 	}
 	error = do_disconnectNetwork(wifiProfileToConnect->NetworkPath);
 
@@ -508,18 +499,18 @@ void wifi_status(struct afb_req request) {
 			json_object_object_add(jresp, "Power",
 					json_object_new_string("OFF"));
 			//json_object_object_add(jresp, "Connection", json_object_new_string("Disconnected"));
-			printf("Wi-Fi OFF\n");
+            DEBUG(afbitf, "Wi-Fi OFF\n");
 		} else {/*Wi-Fi is ON*/
 			json_object_object_add(jresp, "Power",
 					json_object_new_string("ON"));
 			if (status->connected == 0) {/*disconnected*/
 				json_object_object_add(jresp, "Connection",
 						json_object_new_string("Disconnected"));
-				printf("Wi-Fi ON - Disconnected \n");
+                DEBUG(afbitf, "Wi-Fi ON - Disconnected \n");
 			} else {/*Connected*/
 				json_object_object_add(jresp, "Connection",
 						json_object_new_string("Connected"));
-				printf("Wi-Fi ON - Connected \n");
+                DEBUG(afbitf, "Wi-Fi ON - Connected \n");
 			}
 		}
 		afb_req_success(request, jresp, "Wi-Fi - Connection Status Checked");
@@ -583,9 +574,6 @@ static void eventadd (struct afb_req request)
 {
     const char *tag = afb_req_value(request, "tag");
     const char *name = afb_req_value(request, "name");
-
-    printf ("Name: %s\n", name);
-    printf ("Tag: %s\n", tag);
 
     json_object *query = afb_req_json(request);
 

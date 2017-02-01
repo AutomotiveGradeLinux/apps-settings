@@ -52,7 +52,7 @@ static void handle_method_call(GDBusConnection *connection, const gchar *sender,
 	//MyObject *myobj = user_data;
 
 	if (g_strcmp0(method_name, "RequestInput") == 0) {
-		printf("Input requested\n");
+        DEBUG(afbitf,"RequestInput method on Agent interface has been called\n");
 
 		invocation_passkey = invocation;
 
@@ -79,25 +79,25 @@ static void handle_method_call(GDBusConnection *connection, const gchar *sender,
 		 )
 		 ]
 		 */
-		printf("Passphrase requested for network : %s\n", object_path);
+        NOTICE(afbitf,"Passphrase requested for network : %s\n", object_path);
         (*password_callback)(0, object_path);
 
 
 	}
 
 	if (g_strcmp0(method_name, "ReportError") == 0) {
-		printf("Error reported\n");
+        ERROR(afbitf,"ReportError method on Agent interface has een called\n");
 
 		gchar *error_string; // = NULL;
 
 		gchar * object_path;
 		g_variant_get(parameters, "(os)", &object_path, &error_string);
 
-		printf("Error %s for %s\n", error_string, object_path);
+        ERROR(afbitf, "Error %s for %s\n", error_string, object_path);
 
 		if (g_strcmp0(error_string, "invalid-key") == 0) {
 
-			printf("Passkey is not correct.\n");
+            WARNING(afbitf, "Passkey is not correct.\n");
             (*password_callback)(1, "invalid-key");
 
 		}
@@ -110,7 +110,7 @@ GError* sendPasskey(gchar *passkey) {
 	GVariantBuilder *builder;
 	GVariant *value = NULL;
 
-	printf("Passkey to send: %s\n", passkey);
+    NOTICE(afbitf, "Passkey to send: %s\n", passkey);
 
 	builder = g_variant_builder_new(G_VARIANT_TYPE("a{sv}"));
 
@@ -145,39 +145,25 @@ static void on_bus_acquired(GDBusConnection *connection, const gchar *name,
 
 static void test_signal_handler (GDBusConnection *connection, const gchar *sender_name, const gchar *object_path, const gchar *interface_name, const gchar *signal_name, GVariant *parameters, gpointer user_data) {
 
-    //openlog("WIFI Binder", LOG_PID | LOG_CONS, LOG_USER);
-
-
     //do not parse, just check what has changed and make callback -
     // we need to refresh completelist anyway..
     if (g_strcmp0(signal_name, "PropertiesChanged") == 0) {
 
-        //syslog(LOG_INFO, "PropertiesChanged");
         (*wifiListChanged_callback)(1, "PropertiesChanged");
     }
     else if (g_strcmp0(signal_name, "BSSRemoved") == 0) {
-        //syslog(LOG_INFO, "BSSRemoved" );
         (*wifiListChanged_callback)(2, "BSSRemoved");
         }
 
-        else if (g_strcmp0(signal_name, "BSSAdded") == 0) {
-            //syslog(LOG_INFO, "BSSAdded" );
+    else if (g_strcmp0(signal_name, "BSSAdded") == 0) {
             (*wifiListChanged_callback)(2, "BSSAdded");
             }
-    else     printf ("unhandled signal %s %s %s, %s", sender_name, object_path, interface_name, signal_name);//syslog(LOG_INFO, "unhandled signal %s %s %s, %s", sender_name, object_path, interface_name, signal_name);
-
-
-
-    //closelog();
-
-
+    else WARNING(afbitf,"unhandled signal %s %s %s, %s", sender_name, object_path, interface_name, signal_name);
 
 
 }
 
 void* register_agent(void *data) {
-
-    printf("Loop start\n");
 
 	guint owner_id;
 
@@ -210,15 +196,11 @@ void* register_agent(void *data) {
 	//sleep(10);
 	g_main_loop_run(loop);
 
-	printf("Loop running\n");
-
 	g_bus_unown_name(owner_id);
 
 	g_dbus_node_info_unref(introspection_data);
 
 	//g_object_unref(myobj);
-
-	//printf("Loop end\n");
 
 	return NULL;
 
@@ -235,8 +217,8 @@ GError* create_agent(GDBusConnection *connection) {
 	err = pthread_create((&tid[0]), NULL, register_agent, NULL);
 
 	if (err != 0) {
-		printf("\ncan't create thread :[%d]", err);
-		printf("Fatal error!\n\n");
+        ERROR(afbitf,"\ncan't create thread :[%d]", err);
+        ERROR(afbitf,"Fatal error!\n\n");
 		return NULL;
 	}
 
@@ -255,12 +237,12 @@ GError* create_agent(GDBusConnection *connection) {
 			DBUS_REPLY_TIMEOUT, NULL, &error);
 
 	if (error) {
-		printf("error: %d:%s\n", error->code, error->message);
+        ERROR(afbitf,"error: %d:%s\n", error->code, error->message);
 		
 		return error;
 
 	} else {
-        printf("Agent registered\n");
+        INFO(afbitf,"Agent registered\n");
 		return NULL;
 	}
 
@@ -285,11 +267,11 @@ GError* stop_agent(GDBusConnection *connection) {
 			DBUS_REPLY_TIMEOUT, NULL, &error);
 
 	if (error) {
-		printf("error: %d:%s\n", error->code, error->message);
+        ERROR(afbitf, "error: %d:%s\n", error->code, error->message);
 		return error;
 
 	} else {
-		printf("Agent unregistered\n");
+        DEBUG(afbitf,"Agent unregistered\n");
 		return NULL;
 	}
 

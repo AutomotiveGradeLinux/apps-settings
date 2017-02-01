@@ -25,8 +25,6 @@
 #include "wifi-api.h"
 #include "wifi-connman.h"
 
-//#include "syslog.h"
-
 static __thread struct security_profile Security = { NULL, NULL, NULL, NULL, 0,
 		0 };
 
@@ -94,7 +92,6 @@ int extract_values(GVariantIter *content, struct wifi_profile_info* wifiProfile)
 			}
 		}
 	}
-	//printf ("SSID= %s, security= %s, Strength= %d, wps support= %d\n", wifiProfile->ESSID, wifiProfile->Security.sec_type, wifiProfile->Strength, wifiProfile->Security.wps_support);
 	return 0;
 }
 
@@ -109,7 +106,7 @@ int wifi_state(struct wifiStatus *status) {
 
 	connection = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
 	if (connection == NULL) {
-		printf("GDBusconnection is NULL");
+        ERROR(afbitf,"Cannot connect to D-Bus, %s", error->message);
 		return -1;
 	}
 	message = g_dbus_connection_call_sync(connection, CONNMAN_SERVICE,
@@ -117,8 +114,8 @@ int wifi_state(struct wifiStatus *status) {
 			NULL, NULL, G_DBUS_CALL_FLAGS_NONE,
 			DBUS_REPLY_TIMEOUT, NULL, &error);
 	if (message == NULL) {
-		printf("message is NULL");
-		return -1;
+        ERROR(afbitf,"Error %s while calling GetProperties method", error->message);
+        return -1;
 	}
 	g_variant_get(message, "(a{sv})", &array);
 	while (g_variant_iter_loop(array, "{sv}", &key, &var)) {
@@ -151,8 +148,8 @@ GError* do_wifiActivate() {
 	connection = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
 
 	if (connection == NULL) {
-		printf("GDBusconnection is NULL");
-		return error;
+        ERROR(afbitf,"Cannot connect to D-Bus, %s", error->message);
+        return error;
 	}
 
 	//create the agent to handle security
@@ -167,13 +164,13 @@ GError* do_wifiActivate() {
 			params, NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, &error);
 
 	if (error) {
-		printf("error: %d:%s\n", error->code, error->message);
+        ERROR(afbitf,"Error %s while calling SetProperty method", error->message);
 
 		return error;
 	}
 
 	 else {
-		printf("Power ON succeeded\n");
+        NOTICE(afbitf,"Power ON succeeded\n");
 		return NULL;
 	}
 
@@ -188,15 +185,15 @@ GError*  do_wifiDeactivate() {
 	/*connection = gdbus_conn->connection;*/
 	connection = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
 	if (connection == NULL) {
-		printf("GDBusconnection is NULL");
-		return error;
+        ERROR(afbitf,"Cannot connect to D-Bus, %s", error->message);
+        return error;
 	}
 
 	//create the agent to handle security
 	error = stop_agent(connection);
 
 	if (error) {
-		printf("Error while unregistering the agent, ignoring.");
+        WARNING(afbitf, "Error while unregistering the agent, ignoring.");
 
 	}
 
@@ -205,13 +202,13 @@ GError*  do_wifiDeactivate() {
 			params, NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, NULL, &error);
 
 	if (error) {
-		printf("error: %d:%s\n", error->code, error->message);
+        ERROR(afbitf,"Error %s while calling SetProperty method", error->message);
 
 		return error;
 	}
 
 	else {
-		printf("Power OFF succeeded\n");
+        NOTICE(afbitf, "Power OFF succeeded\n");
 		return NULL;
 	}
 }
@@ -223,21 +220,21 @@ GError* do_wifiScan() {
 	/*connection = gdbus_conn->connection;*/
 	connection = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
 	if (connection == NULL) {
-		printf("GDBusconnection is NULL");
-		return error;
+        ERROR(afbitf,"Cannot connect to D-Bus, %s", error->message);
+        return error;
 	}
 
 	g_dbus_connection_call(connection, CONNMAN_SERVICE,
 	CONNMAN_WIFI_TECHNOLOGY_PREFIX, CONNMAN_TECHNOLOGY_INTERFACE, "Scan", NULL,
 			NULL, G_DBUS_CALL_FLAGS_NONE, DBUS_REPLY_TIMEOUT, NULL, NULL, &error);
 	if (error) {
-		printf("error: %d:%s\n", error->code, error->message);
+        ERROR(afbitf,"Error %s while calling Scan method", error->message);
 
 		return error;
 	}
 
 	else {
-		printf("Scan succeeded\n");
+        INFO(afbitf, "Scan succeeded\n");
 		return NULL;
 	}
 }
@@ -254,16 +251,16 @@ GError* do_displayScan(GSList **wifi_list) {
 	/*connection = gdbus_conn->connection;*/
 	connection = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
 	if (connection == NULL) {
-		printf("GDBusconnection is NULL");
-		return error;
+        ERROR(afbitf,"Cannot connect to D-Bus, %s", error->message);
+        return error;
 	}
 	message = g_dbus_connection_call_sync(connection, CONNMAN_SERVICE,
 	CONNMAN_MANAGER_PATH, CONNMAN_MANAGER_INTERFACE, "GetServices", NULL, NULL,
 			G_DBUS_CALL_FLAGS_NONE,
 			DBUS_REPLY_TIMEOUT, NULL, &error);
 	if (message == NULL) {
-		printf("message is NULL");
-		return error;
+        ERROR(afbitf,"Error %s while calling GetServices method", error->message);
+        return error;
 	}
 	g_variant_get(message, "(a(oa{sv}))", &array);
 	while (g_variant_iter_loop(array, "(oa{sv})", &object, &content)) {
@@ -274,15 +271,15 @@ GError* do_displayScan(GSList **wifi_list) {
 			extract_values(content, wifiProfile);
 			wifiProfile->NetworkPath = g_try_malloc0(strlen(object));
 			strcpy(wifiProfile->NetworkPath, object);
-            /*printf(
+            DEBUG(afbitf,
 					"SSID= %s, security= %s, path= %s, Strength= %d, wps support= %d\n",
 					wifiProfile->ESSID, wifiProfile->Security.sec_type,
 					wifiProfile->NetworkPath, wifiProfile->Strength,
 					wifiProfile->Security.wps_support);
-			printf("method= %s, ip address= %s, netmask= %s\n",
+            DEBUG(afbitf, "method= %s, ip address= %s, netmask= %s\n",
 					wifiProfile->wifiNetwork.method,
 					wifiProfile->wifiNetwork.IPaddress,
-                    wifiProfile->wifiNetwork.netmask);*/
+                    wifiProfile->wifiNetwork.netmask);
 			*wifi_list = g_slist_append(*wifi_list,
 					(struct wifi_profile_info *) wifiProfile);
 		}
@@ -294,7 +291,7 @@ GError* do_displayScan(GSList **wifi_list) {
 
 GError* do_connectNetwork(gchar *networkPath) {
 
-	printf("Connecting to: %s\n", networkPath);
+    NOTICE(afbitf, "Connecting to: %s\n", networkPath);
 
 	GVariant *message = NULL;
 	GError *error = NULL;
@@ -307,14 +304,13 @@ GError* do_connectNetwork(gchar *networkPath) {
 			G_DBUS_CALL_FLAGS_NONE,
 			DBUS_REPLY_TIMEOUT_SHORT, NULL, &error);
 
-	//printf("message error %s\n", message);
 	//TODO: do we need retunrn value in message
 
 	if (error) {
-		printf("do_connectNetwork error: %s\n", error->message);
-		return error;
+        ERROR(afbitf,"Error %s while calling Connect method", error->message);
+        return error;
 	} else {
-		printf("Connection succeeded\n");
+        INFO(afbitf,"Connection succeeded\n");
 		return NULL;
 	}
 
@@ -322,13 +318,18 @@ GError* do_connectNetwork(gchar *networkPath) {
 
 GError* do_disconnectNetwork(gchar *networkPath) {
 
-	printf("Connecting to: %s\n", networkPath);
+    NOTICE(afbitf, "Connecting to: %s\n", networkPath);
 
 	GVariant *message = NULL;
 	GError *error = NULL;
 	GDBusConnection *connection;
 
 	connection = g_bus_get_sync(G_BUS_TYPE_SYSTEM, NULL, &error);
+
+    if (connection == NULL) {
+        ERROR(afbitf,"Cannot connect to D-Bus, %s", error->message);
+        return error;
+    }
 
 	message = g_dbus_connection_call_sync(connection, CONNMAN_SERVICE,
 			networkPath, CONNMAN_SERVICE_INTERFACE, "Disconnect", NULL, NULL,
@@ -338,18 +339,18 @@ GError* do_disconnectNetwork(gchar *networkPath) {
 	//TODO: do we need return value in message
 
 	if (error) {
-		printf("error: %s\n", error->message);
-		return error;
+        ERROR(afbitf,"Error %s while calling Disconnect method", error->message);
+        return error;
 	} else {
-		printf("Disconnected\n");
-		return NULL;
+        INFO(afbitf,"Disconnection succeeded\n");
+        return NULL;
 	}
 
 }
 
 void registerPasskey(gchar *passkey) {
 
-	printf("Passkey: %s\n", passkey);
+    INFO(afbitf,"Passkey: %s\n", passkey);
 	sendPasskey(passkey);
 
 
@@ -363,20 +364,18 @@ GError* setHMIStatus(enum wifiStates state) {
     GVariant *message = NULL;
     GError *error = NULL;
 
-    //openlog("WIFI Binder", LOG_PID | LOG_CONS, LOG_USER);
-
     if (state==BAR_NO) iconString = "qrc:/images/Status/HMI_Status_Wifi_NoBars-01.png";
     else if (state==BAR_1) iconString = "qrc:/images/Status/HMI_Status_Wifi_1Bar-01.png";
     else if (state==BAR_2) iconString = "qrc:/images/Status/HMI_Status_Wifi_2Bars-01.png";
     else if (state==BAR_3) iconString = "qrc:/images/Status/HMI_Status_Wifi_3Bars-01.png";
     else if (state==BAR_FULL) iconString = "qrc:/images/Status/HMI_Status_Wifi_Full-01.png";
-    //else {syslog(LOG_ERR, "Default value for wifi HMI icon, should not happened.. : %d", state);
-    //    iconString = "qrc:/images/Status/HMI_Status_Wifi_NoBars-01.png";
-    //}
-
-    //syslog(LOG_INFO, "%s", iconString);
 
     connection = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
+
+    if (connection == NULL) {
+        ERROR(afbitf,"Cannot connect to D-Bus, %s", error->message);
+        return error;
+    }
 
     params = g_variant_new("(is)", HOMESCREEN_WIFI_ICON_POSITION, iconString);
 
@@ -386,14 +385,12 @@ GError* setHMIStatus(enum wifiStates state) {
             DBUS_REPLY_TIMEOUT, NULL, &error);
 
     if (error) {
-        printf("error: %s\n", error->message);
+        ERROR(afbitf,"Error %s while setting up the status icon", error->message);
 
         return error;
     } else {
         return NULL;
     }
-
-    //closelog();
 
 }
 

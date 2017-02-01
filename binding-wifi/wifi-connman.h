@@ -13,15 +13,27 @@
 *   limitations under the License.
 */
 
+#define _GNU_SOURCE
+
 //#include <dlog.h>
 #include <glib.h>
 #include <stdlib.h>
 #include <gio/gio.h>
 #include <glib-object.h>
 
+#include <afb/afb-binding.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+//
+
+
+/*
+ * the interface to afb-daemon
+ */
+const struct afb_binding_interface *afbitf;
 
 /** Maximum Profile Count */
 #define CONNMAN_MAX_BUFLEN 512

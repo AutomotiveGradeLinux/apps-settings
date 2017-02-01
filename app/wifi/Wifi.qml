@@ -53,24 +53,23 @@ SettingPage {
         url: address_str
         onTextMessageReceived: {
             var message_json = JSON.parse(message)
-            //console.log("Raw response: " + message)
-            //console.log("JSON response: " + message_json)
+            console.debug("Raw response: " + message)
             /* server is not happy with our request, ignore it */
             if ((message_json[0] === msgid_enu.reterr)) {
 
-                console.log("Return value is not ok !")
-                console.log("Raw response: " + message)
+                console.error("Return value is not OK!")
+                console.error("Raw response: " + message)
                 return
 
             } else if ((message_json[0] === msgid_enu.event)) {
 
                 var eventContent = JSON.parse(JSON.stringify(message_json[2]))
 
-                console.log("Return value is EVENT: " + eventContent.event)
+                console.log("Received EVENT: " + eventContent.event)
 
                 if (eventContent.event === "wifi-manager/networkListUpdated") {
 
-                    console.log("Event data:" + eventContent.data.data1 + ", " + eventContent.data.data2 )
+                    console.debug("Event data:" + eventContent.data.data1 + ", " + eventContent.data.data2 )
                     console.log("Network List was updated, sending scan_result request")
 
                     //update network list
@@ -81,8 +80,7 @@ SettingPage {
 
                 else if (eventContent.event === "wifi-manager/passwordQuery") {
 
-                    console.log("Event data:" + eventContent.data.data1 + ", " + eventContent.data.data2 )
-
+                    console.debug("Event data:" + eventContent.data.data1 + ", " + eventContent.data.data2 )
                     console.log("Passkey requested")
                     dialog.visible = true
 
@@ -125,14 +123,13 @@ SettingPage {
 
                 }
             } else
-                console.log("ELSE msgid", message_json[0])
+                console.log("Unhadled websocket message", message_json[0])
         }
         onStatusChanged: {
 
             var parameterJson = 0
             var requestJson = 0
 
-            console.log("Status changed")
             if (websocket.status == WebSocket.Error) {
                 status_str = "Error: " + websocket.errorString
 
@@ -140,7 +137,6 @@ SettingPage {
                 status_str = "Socket opened; sending message..."
 
                 //subscribe for events
-
 
                 //network list updated event
                 verb_str = "eventadd"
@@ -193,7 +189,6 @@ SettingPage {
             }
 
             console.log(status_str)
-            console.log(websocket.status)
         }
         active: false
     }
@@ -315,7 +310,7 @@ SettingPage {
 
 
                 } else {
-                    console.log("Connect to", index, " ,", name)
+                    console.log("Requesting connection to network #", index, ", ", name, ".")
                     view.currentIndex = model.index
 
                     //make some indication that connection is in progress
