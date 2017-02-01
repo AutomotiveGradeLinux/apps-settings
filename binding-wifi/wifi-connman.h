@@ -104,9 +104,10 @@ struct wifi_profile_info{
 
 enum wifiStates {BAR_NO, BAR_1, BAR_2, BAR_3, BAR_FULL};
 
-//typedef void(*callback)(void);
-typedef void(*callback)(int password_rejected_flag);
-void register_callback(callback ptr);
+typedef void(*callback)(int number, const char* asciidata);
+void register_callbackSecurity(callback ptr);
+void register_callbackWiFiList(callback ptr);
+
 
 
 int extract_values(GVariantIter *content, struct wifi_profile_info* wifiProfile);

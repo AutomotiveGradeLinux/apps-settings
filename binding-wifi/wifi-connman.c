@@ -25,6 +25,8 @@
 #include "wifi-api.h"
 #include "wifi-connman.h"
 
+//#include "syslog.h"
+
 static __thread struct security_profile Security = { NULL, NULL, NULL, NULL, 0,
 		0 };
 
@@ -36,7 +38,7 @@ int extract_values(GVariantIter *content, struct wifi_profile_info* wifiProfile)
 	const gchar *subkey = NULL;
 	const gchar *value_char = NULL;
 	GVariantIter *content_sub;
-	int value_int;
+    unsigned int value_int;
 	gsize length;
 
 	while (g_variant_iter_loop(content, "{sv}", &key, &var)) {
@@ -272,7 +274,7 @@ GError* do_displayScan(GSList **wifi_list) {
 			extract_values(content, wifiProfile);
 			wifiProfile->NetworkPath = g_try_malloc0(strlen(object));
 			strcpy(wifiProfile->NetworkPath, object);
-			printf(
+            /*printf(
 					"SSID= %s, security= %s, path= %s, Strength= %d, wps support= %d\n",
 					wifiProfile->ESSID, wifiProfile->Security.sec_type,
 					wifiProfile->NetworkPath, wifiProfile->Strength,
@@ -280,7 +282,7 @@ GError* do_displayScan(GSList **wifi_list) {
 			printf("method= %s, ip address= %s, netmask= %s\n",
 					wifiProfile->wifiNetwork.method,
 					wifiProfile->wifiNetwork.IPaddress,
-					wifiProfile->wifiNetwork.netmask);
+                    wifiProfile->wifiNetwork.netmask);*/
 			*wifi_list = g_slist_append(*wifi_list,
 					(struct wifi_profile_info *) wifiProfile);
 		}
@@ -361,12 +363,18 @@ GError* setHMIStatus(enum wifiStates state) {
     GVariant *message = NULL;
     GError *error = NULL;
 
+    //openlog("WIFI Binder", LOG_PID | LOG_CONS, LOG_USER);
+
     if (state==BAR_NO) iconString = "qrc:/images/Status/HMI_Status_Wifi_NoBars-01.png";
     else if (state==BAR_1) iconString = "qrc:/images/Status/HMI_Status_Wifi_1Bar-01.png";
     else if (state==BAR_2) iconString = "qrc:/images/Status/HMI_Status_Wifi_2Bars-01.png";
     else if (state==BAR_3) iconString = "qrc:/images/Status/HMI_Status_Wifi_3Bars-01.png";
     else if (state==BAR_FULL) iconString = "qrc:/images/Status/HMI_Status_Wifi_Full-01.png";
-    else iconString = "qrc:/images/Status/HMI_Status_Wifi_NoBars-01.png";
+    //else {syslog(LOG_ERR, "Default value for wifi HMI icon, should not happened.. : %d", state);
+    //    iconString = "qrc:/images/Status/HMI_Status_Wifi_NoBars-01.png";
+    //}
+
+    //syslog(LOG_INFO, "%s", iconString);
 
     connection = g_bus_get_sync(G_BUS_TYPE_SESSION, NULL, &error);
 
@@ -384,6 +392,8 @@ GError* setHMIStatus(enum wifiStates state) {
     } else {
         return NULL;
     }
+
+    //closelog();
 
 }
 

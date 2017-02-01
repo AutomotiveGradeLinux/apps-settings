@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2016 The Qt Company Ltd.
  *
@@ -18,7 +19,8 @@ import QtQuick 2.6
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.0
 import AGL.Demo.Controls 1.0
-import '..'
+import QtWebSockets 1.0
+import ".."
 
 SettingPage {
     id: root
@@ -27,50 +29,215 @@ SettingPage {
     checkable: true
 
     property string wifiAPIpath: bindingAddress + '/wifi-manager/'
+    //http://localhost:12345/api
+
+    property string address_str: bindingAddressWS
+
+    property string token_str: ""
+    property string api_str: "wifi-manager"
+    property string verb_str: ""
+    property string parameter_str: ""
+    property string payloadLength: "9999"
+
+    property var msgid_enu: {
+         "call": 2,
+         "retok": 3,
+         "reterr": 4,
+         "event": 5
+    }
+    property string request_str: ""
+    property string status_str: ""
+
+    WebSocket {
+        id: websocket
+        url: address_str
+        onTextMessageReceived: {
+            var message_json = JSON.parse(message)
+            //console.log("Raw response: " + message)
+            //console.log("JSON response: " + message_json)
+            /* server is not happy with our request, ignore it */
+            if ((message_json[0] === msgid_enu.reterr)) {
+
+                console.log("Return value is not ok !")
+                console.log("Raw response: " + message)
+                return
+
+            } else if ((message_json[0] === msgid_enu.event)) {
+
+                var eventContent = JSON.parse(JSON.stringify(message_json[2]))
+
+                console.log("Return value is EVENT: " + eventContent.event)
+
+                if (eventContent.event === "wifi-manager/networkListUpdated") {
+
+                    console.log("Event data:" + eventContent.data.data1 + ", " + eventContent.data.data2 )
+                    console.log("Network List was updated, sending scan_result request")
+
+                    //update network list
+                    verb_str = "scan_result"
+                    var parameterJson = 'None'
+                    sendSocketMesage(verb_str, parameterJson)
+                }
+
+                else if (eventContent.event === "wifi-manager/passwordQuery") {
+
+                    console.log("Event data:" + eventContent.data.data1 + ", " + eventContent.data.data2 )
+
+                    console.log("Passkey requested")
+                    dialog.visible = true
+
+                }
+                else {
+
+                    console.error("Unhadled event.")
+
+                }
+            } else if ((message_json[0] === msgid_enu.retok)) {
+
+
+                /* token creation or refresh happened, store it and enable buttons */
+                if (verb_str == "connect") {
+                    token_str = message_json[3]
+
+                    console.error("Connect reply received!")
+
+
+                } else if (verb_str == "logout") {
+                    websocket.active = false // close the socket
+
+                } else if (verb_str == "scan_result") {
+
+                    var jsonObjectNetworks = JSON.parse(
+                                JSON.stringify(message_json[2].response))
+
+                    networkList.clear()
+                    for (var i = 0; i < jsonObjectNetworks.length; i++) {
+
+                        networkList.append({
+                                               number: jsonObjectNetworks[i].Number,
+                                               name: jsonObjectNetworks[i].ESSID,
+                                               strength: jsonObjectNetworks[i].Strength,
+                                               serviceState: jsonObjectNetworks[i].State,
+                                               security: jsonObjectNetworks[i].Security,
+                                               address: jsonObjectNetworks[i].IPAddress
+                                           })
+                    }
+
+                }
+            } else
+                console.log("ELSE msgid", message_json[0])
+        }
+        onStatusChanged: {
+
+            var parameterJson = 0
+            var requestJson = 0
+
+            console.log("Status changed")
+            if (websocket.status == WebSocket.Error) {
+                status_str = "Error: " + websocket.errorString
+
+            } else if (websocket.status == WebSocket.Open) {
+                status_str = "Socket opened; sending message..."
+
+                //subscribe for events
+
+
+                //network list updated event
+                verb_str = "eventadd"
+                parameterJson = {
+                    tag: 'networkList',
+                    name: 'networkListUpdated'
+                }
+                sendSocketMesage(verb_str, parameterJson)
+
+
+                //TODO: send this ONLY when OK response is received
+                verb_str = "eventsub"
+                parameterJson = {
+                    tag: 'networkList'
+                }
+                sendSocketMesage(verb_str, parameterJson)
+
+
+                //password required event
+                verb_str = "eventadd"
+                parameterJson = {
+                    tag: 'password',
+                    name: 'passwordQuery'
+                }
+                sendSocketMesage(verb_str, parameterJson)
+
+
+                //TODO: send this ONLY when OK response is received
+                verb_str = "eventsub"
+                parameterJson = {
+                    tag: 'password'
+                }
+                sendSocketMesage(verb_str, parameterJson)
+
+
+                verb_str = "activate"
+                parameterJson = 'None'
+                sendSocketMesage(verb_str, parameterJson)
+
+
+                //get scan results right away
+                verb_str = "scan_result"
+                parameterJson = 'None'
+                sendSocketMesage(verb_str, parameterJson)
+
+
+            } else if (websocket.status == WebSocket.Closed) {
+                status_str = "Socket closed"
+                //TODO: unsubscribe for events
+            }
+
+            console.log(status_str)
+            console.log(websocket.status)
+        }
+        active: false
+    }
 
     onCheckedChanged: {
         console.log("Wifi set to", checked)
+
         if (checked == true) {
-            periodicRefresh.start()
-            request(wifiAPIpath + 'activate', function (o) {
-                // log the json response
-                console.log(o.responseText)
-            })
+            //activating is done when socket is opened
+            websocket.active = true
 
         } else {
-            //console.log(networkPath)
             networkList.clear()
-            request(wifiAPIpath + 'deactivate', function (o) {
-                // log the json response
-                console.log(o.responseText)
-            })
+
+            verb_str = "deactivate"
+            var parameterJson = 'None'
+            sendSocketMesage(verb_str, parameterJson)
+
+            websocket.active = false
         }
+
+
     }
-    function listWifiNetworks() {
-        console.log("test #4")
+
+
+    function sendSocketMesage(verb, parameter) {
+
+
+        var requestJson = [msgid_enu.call, payloadLength, api_str + '/'
+                           + verb, parameter]
+
+        websocket.sendTextMessage(JSON.stringify(requestJson))
+
     }
     ListModel {
         id: networkList
     }
 
-    function request(url, callback) {
-        var xhr = new XMLHttpRequest()
-        xhr.onreadystatechange = (function (myxhr) {
-            return function () {
-                if (xhr.readyState == 4 && xhr.status == 200)
-                    callback(myxhr)
-            }
-        })
-        (xhr)
-        xhr.open('GET', url, false)
-        xhr.send('')
-    }
 
     function securityType(security) {
-       if (security === "Open")
-           return "unsecured"
-       else
-           return "secured"
+        if (security === "Open")
+            return "unsecured"
+        else
+            return "secured"
     }
 
     Component {
@@ -108,57 +275,71 @@ SettingPage {
                     text: name
                     color: '#66FF99'
                     font.pixelSize: 48
-                    font.bold: serviceState === "ready" || serviceState === "online"
+                    font.bold: serviceState === "ready"
+                               || serviceState === "online"
                 }
                 Label {
-                    visible: serviceState === "ready" || serviceState === "online"
+                    visible: serviceState === "ready"
+                             || serviceState === "online"
                     text: "connected, " + address
-                    font.pointSize: 18
+                    font.pixelSize: 18
                     color: "white"
                     //font.italic: true
                 }
             }
 
+
+
             onClicked: {
+                var parameterJson = 0
+                var requestJson = 0
+
                 //connectButton.border.color = "steelblue"
-                if ((serviceState === "ready")
-                        || serviceState === "online") {
+                if ((serviceState === "ready") || serviceState === "online") {
+
 
                     //means we are connected
                     console.log("Disconnecting from", index, " ,", name)
-                    request(wifiAPIpath + 'disconnect?network=' + index,
-                            function (o) {
 
-                                //showRequestInfo(o.responseText)
-                                console.log(o.responseText)
-                            })
-                } else {
-                    console.log("Conect to", index, " ,", name)
-                    view.currentIndex = model.index
-                    if (securityType(security) === "unsecured") {
-                        request(wifiAPIpath + 'connect?network=' + view.currentIndex,
-                                function (o) {
+                    //make some indication that disconnection is in progress
+                    //probably not good enough, though. TODO: make it better
+                    networkNameText.font.italic = 1
 
-                                    // log the json response
-                                    //showRequestInfo(o.responseText)
-                                    console.log(o.responseText)
-                                })
-                    } else {
-                        dialog.visible = true
+                    verb_str = "disconnect"
+                    parameterJson = {
+                        network: view.currentIndex
                     }
+                    sendSocketMesage(verb_str, parameterJson)
+
+
+
+
+                } else {
+                    console.log("Connect to", index, " ,", name)
+                    view.currentIndex = model.index
+
+                    //make some indication that connection is in progress
+                    //probably not good enough, though. TODO: make it better
+                    networkNameText.font.italic = 1
+
+                    verb_str = "connect"
+                    parameterJson = {
+                        network: view.currentIndex
+                    }
+                    sendSocketMesage(verb_str, parameterJson)
+
                 }
             }
 
-//            ImageButton {
-//                anchors.verticalCenter: parent.verticalCenter
-//                anchors.right: parent.right
-//                offImage: '../images/HMI_Settings_X.svg'
-//                onClicked: {
 
-//                }
-//            }
+            //            ImageButton {
+            //                anchors.verticalCenter: parent.verticalCenter
+            //                anchors.right: parent.right
+            //                offImage: '../images/HMI_Settings_X.svg'
+            //                onClicked: {
 
-
+            //                }
+            //            }
             Image {
                 source: '../images/HMI_Settings_DividingLine.svg'
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -174,7 +355,7 @@ SettingPage {
         id: view
         anchors.fill: parent
         anchors.margins: 100
-        model: networkList //WifiList {}
+        model: networkList
         delegate: wifiDevice
         clip: true
     }
@@ -213,25 +394,16 @@ SettingPage {
                         text: 'Connect'
                         highlighted: true
                         onClicked: {
+
                             var passkey = password.text
                             console.log("Validating", passkey)
 
-                            console.log("Passkey is", passkey)
-                            request(wifiAPIpath + 'security?passkey=' + passkey,
-                                    function (o) {
-
-                                        //showRequestInfo(o.responseText)
-                                        console.log(o.responseText)
-                                    })
-
-                            request(wifiAPIpath + 'connect?network=' + view.currentIndex,
-                                    function (o) {
-
-                                        // log the json response
-                                        //showRequestInfo(o.responseText)
-                                        console.log(o.responseText)
-                                    })
-
+                            //just send the password, binder is waiting for it
+                            verb_str = "insertpasskey"
+                            var parameterJson = {
+                                passkey: passkey
+                            }
+                            sendSocketMesage(verb_str, parameterJson)
                             dialog.visible = false
                         }
                     }
@@ -252,36 +424,4 @@ SettingPage {
         }
     }
 
-    //Timer for periodic refresh; this is BAD solution, need to figure out how to subscribe for events
-    Timer {
-        id: periodicRefresh
-        interval: 1000 // 1second
-        running: !dialog.visible
-        onTriggered: {
-
-            networkList.clear()
-            request(wifiAPIpath + 'scan_result', function (o) {
-                // log the json response
-                console.log(o.responseText)
-
-                // translate response into object
-                var jsonObject = JSON.parse(o.responseText)
-                var jsonObjectNetworks = jsonObject.response
-                console.log("WiFi list refreshed")
-                //console.log(jsonObject.response)
-                for (var i = 0; i < jsonObjectNetworks.length; i++) {
-                    networkList.append({
-                                           number: jsonObjectNetworks[i].Number,
-                                           name: jsonObjectNetworks[i].ESSID,
-                                           strength: jsonObjectNetworks[i].Strength,
-                                           serviceState: jsonObjectNetworks[i].State,
-                                           security: jsonObjectNetworks[i].Security,
-                                           address: jsonObjectNetworks[i].IPAddress
-                                       })
-                }
-            })
-            start()
-        }
-    }
 }
-

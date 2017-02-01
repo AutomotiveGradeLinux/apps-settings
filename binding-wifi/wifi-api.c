@@ -42,8 +42,10 @@ static int password_not_correct_flag = 0;
 
 char *passkey;
 callback ptr_my_callback;
+callback wifiListChanged_clbck;
 
 GSList *wifi_list = NULL;
+
 
 /**
  * \brief Read out the passkey from the use and pass it to Agent
@@ -54,73 +56,119 @@ GSList *wifi_list = NULL;
  *
  *
  * */
-void passkey_inserted(void) {
+void wifi_passkey(struct afb_req request) {
 
-	printf("Passkey inserted: %s\n", passkey);
 
-	if (passkey != NULL) {
+    const char *passkey_from_user;
 
-		registerPasskey(passkey);
-	} else {
-		printf("Please enter the password first\n");
+    /* retrieves the argument, expects password string */
+    passkey_from_user = afb_req_value(request, "passkey");
 
-	}
+    printf("Passkey inserted: %s\n", passkey_from_user);
+
+    sendPasskey(passkey_from_user);
+
+
+    if (passkey != NULL) {
+
+        registerPasskey(passkey);
+    } else {
+        printf("Please enter the password first\n");
+
+    }
+}
+
+
+
+struct event
+{
+    struct event *next;
+    struct afb_event event;
+    char tag[1];
+};
+
+static struct event *events = 0;
+
+/* searchs the event of tag */
+static struct event *event_get(const char *tag)
+{
+    struct event *e = events;
+    while(e && strcmp(e->tag, tag))
+        e = e->next;
+    return e;
+}
+
+static int event_push(struct json_object *args, const char *tag)
+{
+    struct event *e;
+    e = event_get(tag);
+    return e ? afb_event_push(e->event, json_object_get(args)) : -1;
+}
+
+static void eventpush (struct afb_req request)
+{
+    const char *tag = afb_req_value(request, "tag");
+    const char *data = afb_req_value(request, "data");
+    ///data = "mojedata";
+    json_object *object = data ? json_tokener_parse(data) : NULL;
+
+    if (tag == NULL)
+        afb_req_fail(request, "failed", "bad arguments");
+    else if (0 > event_push(object, tag))
+        afb_req_fail(request, "failed", "push error");
+    else
+        afb_req_success(request, NULL, NULL);
 }
 
 /**
  * \brief Notify user that password is necessary
  *
  * This function is called from the registered agent on RequestInput() call.
- * \todo Subscribe for this event from GUI.
  *
  * */
-void ask_for_passkey(int password_rejected_flag) {
-	//TODO: show network we are asking password for
-	printf("Insert passkey.\n");
+void ask_for_passkey(int number, const char* asciidata) {
+    //TODO: show network we are asking password for
+    printf("Insert passkey.\n");
+    ERROR(afbitf, "Insert passkey.");
 
-	if (!password_rejected_flag) {
-		need_password_flag = 1;
-		password_not_correct_flag = 0;
-		//sleep(1);
-		passkey_inserted();
+    json_object *jresp = json_object_new_object();
 
-	}
+    json_object *int1 = json_object_new_int(number);
+    json_object *string = json_object_new_string(asciidata);
 
-	else if (password_rejected_flag) {
-		need_password_flag = 1;
-		printf("Password not correct!\n");
+    json_object_object_add(jresp, "data1", int1);
+    json_object_object_add(jresp, "data2", string);
 
-	}
 
+    event_push(jresp, "password");
 }
 
 /**
- * \brief Insert passkey that will be used for connections to secured AP.
+ * \brief Notify GUI that wifi list has changed
  *
- * \TODO Only temporary, user should enter the password on ask_for_passkey() callback
+ * This function is called from the registered agent on RequestInput() call.
+ * \todo Subscribe for this event from GUI.
  *
  * */
-void wifi_insertpasskey(struct afb_req request) {
+void wifiListChanged(int number, const char* asciidata) {
 
-	const char *passkey_from_user;
+    //WARNING(afbitf, "wifiListChanged, reason:%d, %s",number, asciidata );
 
-	/* retrieves the argument, expects password string */
-	passkey_from_user = afb_req_value(request, "passkey");
 
-	if (passkey_from_user == NULL) {
-		//TODO:better error message
-		afb_req_fail(request, "failed", "specify a security key");
+    json_object *jresp = json_object_new_object();
 
-	} else {
+    json_object *int1 = json_object_new_int(number);
+    json_object *string = json_object_new_string(asciidata);
 
-		passkey = g_try_malloc0(256);
-		strcpy(passkey, passkey_from_user);
-		printf("Passkey is %s\n", passkey);
+    json_object_object_add(jresp, "data1", int1);
+    json_object_object_add(jresp, "data2", string);
 
-	}
+    event_push(jresp, "networkList");
 
-	afb_req_success(request, NULL, NULL);
+
+
 }
+
 
 /**
  * \brief initialize the binder and activates the WiFi HW, should be called first
@@ -141,23 +189,32 @@ static void wifi_activate(struct afb_req request) /*AFB_SESSION_CHECK*/
 
 		printf("Registering callback\n");
 
-		ptr_my_callback = ask_for_passkey;
-		register_callback(ptr_my_callback);
+        ptr_my_callback = ask_for_passkey;
+        register_callbackSecurity(ptr_my_callback);
 
 	}
 
-	jresp = json_object_new_object();
-	json_object_object_add(jresp, "activation", json_object_new_string("on"));
+    if (wifiListChanged_clbck == NULL) {
 
-	error = do_wifiActivate();
+        printf("Registering callback wifiListChanged_clbck \n");
 
-	if (error == NULL) {
+        wifiListChanged_clbck = wifiListChanged;
+        register_callbackWiFiList(wifiListChanged_clbck);
 
-		afb_req_success(request, jresp, "Wi-Fi - Activated");
+    }
 
-	} else
+    jresp = json_object_new_object();
+    json_object_object_add(jresp, "activation", json_object_new_string("on"));
 
-		afb_req_fail(request, "failed", error->message);
+    error = do_wifiActivate();
+
+    if (error == NULL) {
+
+        afb_req_success(request, jresp, "Wi-Fi - Activated");
+
+    } else
+
+        afb_req_fail(request, "failed", error->message);
 
 }
 
@@ -230,7 +287,7 @@ void wifi_scanResult(struct afb_req request) /*AFB_SESSION_CHECK*/
 	char *address = NULL;
 	char *security = NULL;
 	char *state = NULL;
-	int strength = 0;
+    unsigned int strength = 0;
 	int number = 0;
 	GError *error = NULL;
 
@@ -268,7 +325,7 @@ void wifi_scanResult(struct afb_req request) /*AFB_SESSION_CHECK*/
 			json_object_object_add(jresp, "IPAddress", jstring3);
 			json_object_object_add(jresp, "State", jstring4);
 
-			printf("The object json: %s\n", json_object_to_json_string(jresp));
+            //printf("The object json: %s\n", json_object_to_json_string(jresp));
 			/*input each scan result into my_array*/
 			json_object_array_add(my_array, jresp);
 			number += 1;
@@ -472,7 +529,91 @@ void wifi_status(struct afb_req request) {
 }
 
 void wifi_reconnect() {
-	/*TBD*/
+    /*TBD*/
+}
+
+
+
+
+/* deletes the event of tag */
+static int event_del(const char *tag)
+{
+    struct event *e, **p;
+
+    /* check exists */
+    e = event_get(tag);
+    if (!e) return -1;
+
+    /* unlink */
+    p = &events;
+    while(*p != e) p = &(*p)->next;
+    *p = e->next;
+
+    /* destroys */
+    afb_event_drop(e->event);
+    free(e);
+    return 0;
+}
+
+/* creates the event of tag */
+static int event_add(const char *tag, const char *name)
+{
+    struct event *e;
+
+    /* check valid tag */
+    e = event_get(tag);
+    if (e) return -1;
+
+    /* creation */
+    e = malloc(strlen(tag) + sizeof *e);
+    if (!e) return -1;
+    strcpy(e->tag, tag);
+
+    /* make the event */
+    e->event = afb_daemon_make_event(afbitf->daemon, name);
+    if (!e->event.closure) { free(e); return -1; }
+
+    /* link */
+    e->next = events;
+    events = e;
+    return 0;
+}
+
+static void eventadd (struct afb_req request)
+{
+    const char *tag = afb_req_value(request, "tag");
+    const char *name = afb_req_value(request, "name");
+
+    printf ("Name: %s\n", name);
+    printf ("Tag: %s\n", tag);
+
+    json_object *query = afb_req_json(request);
+
+    if (tag == NULL || name == NULL)
+        afb_req_fail(request, "failed", "bad arguments");
+    else if (0 != event_add(tag, name))
+        afb_req_fail(request, "failed", "creation error");
+    else
+        afb_req_success(request, NULL, NULL);
+}
+
+static int event_subscribe(struct afb_req request, const char *tag)
+{
+    struct event *e;
+    e = event_get(tag);
+    return e ? afb_req_subscribe(request, e->event) : -1;
+}
+
+static void eventsub (struct afb_req request)
+{
+    const char *tag = afb_req_value(request, "tag");
+
+    if (tag == NULL)
+        afb_req_fail(request, "failed", "bad arguments");
+    else if (0 != event_subscribe(request, tag))
+        afb_req_fail(request, "failed", "subscription error");
+    else
+        afb_req_success(request, NULL, NULL);
 }
 
 
@@ -482,15 +623,23 @@ void wifi_reconnect() {
  */
 static const struct afb_verb_desc_v1 binding_verbs[] = {
 /* VERB'S NAME     			SESSION MANAGEMENT          	FUNCTION TO CALL  					SHORT DESCRIPTION */
-{ .name = "activate", 	.session = AFB_SESSION_NONE, 		.callback = wifi_activate, 			.info = "Activate Wi-Fi" },
-{ .name = "deactivate", .session = AFB_SESSION_NONE, 		.callback = wifi_deactivate, 		.info ="Deactivate Wi-Fi" },
-{ .name = "scan", 		.session = AFB_SESSION_NONE,		.callback = wifi_scan, 				.info = "Scanning Wi-Fi" },
-{ .name = "scan_result",.session = AFB_SESSION_NONE, 		.callback = wifi_scanResult,		.info = "Get scan result Wi-Fi" },
-{ .name = "connect", 	.session = AFB_SESSION_NONE, 		.callback = wifi_connect, 			.info ="Connecting to Access Point" },
-{ .name = "status", 	.session = AFB_SESSION_NONE, 		.callback = wifi_status, 			.info ="Check connection status" },
-{ .name = "disconnect", .session = AFB_SESSION_NONE, 		.callback = wifi_disconnect, 		.info ="Disconnecting connection" },
-{ .name = "reconnect", 	.session = AFB_SESSION_NONE, 		.callback = wifi_reconnect, 		.info ="Reconnecting to Access Point" },
-{ .name = "security", 	.session = AFB_SESSION_NONE, 		.callback = wifi_insertpasskey, 	.info ="Insert passkey" },
+{ .name = "activate", 	  .session = AFB_SESSION_NONE, .callback = wifi_activate, 	.info = "Activate Wi-Fi" },
+{ .name = "deactivate",   .session = AFB_SESSION_NONE, .callback = wifi_deactivate, .info ="Deactivate Wi-Fi" },
+{ .name = "scan", 		  .session = AFB_SESSION_NONE, .callback = wifi_scan, 		.info = "Scanning Wi-Fi" },
+{ .name = "scan_result",  .session = AFB_SESSION_NONE, .callback = wifi_scanResult,	.info = "Get scan result Wi-Fi" },
+{ .name = "connect", 	  .session = AFB_SESSION_NONE, .callback = wifi_connect, 	.info ="Connecting to Access Point" },
+{ .name = "status", 	  .session = AFB_SESSION_NONE, .callback = wifi_status, 	.info ="Check connection status" },
+{ .name = "disconnect",   .session = AFB_SESSION_NONE, .callback = wifi_disconnect, .info ="Disconnecting connection" },
+{ .name = "reconnect", 	  .session = AFB_SESSION_NONE, .callback = wifi_reconnect, 	.info ="Reconnecting to Access Point" },
+{ .name = "insertpasskey",.session = AFB_SESSION_NONE, .callback = wifi_passkey,    .info ="inputs the passkey after it has been requsted"},
+{ .name = "eventadd",     .session = AFB_SESSION_NONE, .callback = eventadd,        .info ="adds the event of 'name' for the 'tag'"},
+{ .name = "eventsub",     .session = AFB_SESSION_NONE, .callback = eventsub,        .info ="unsubscribes to the event of 'tag'"},
+{ .name = "eventpush",    .session = AFB_SESSION_NONE, .callback = eventpush,       .info ="pushes the event of 'tag' with the 'data'"},
+
+
+
+
+
 
 { .name = NULL } /* marker for end of the array */
 };

@@ -79,17 +79,25 @@ int main(int argc, char *argv[])
     if (!positionalArguments.isEmpty()) {
         port = positionalArguments.takeFirst().toInt();
     }
-//        QString secret = positionalArguments.takeFirst();
+    QString secret = positionalArguments.takeFirst();
     QUrl bindingAddress;
     bindingAddress.setScheme(QStringLiteral("http"));
     bindingAddress.setHost(QStringLiteral("localhost"));
     bindingAddress.setPort(port);
     bindingAddress.setPath(QStringLiteral("/api"));
-//        QUrlQuery query;
-//        query.addQueryItem(QStringLiteral("token"), secret);
-//        bindingAddress.setQuery(query);
+    QUrlQuery query;
+    query.addQueryItem(QStringLiteral("token"), secret);
+    //bindingAddress.setQuery(query);
+
+    QUrl bindingAddressWS;
+    bindingAddressWS.setScheme(QStringLiteral("ws"));
+    bindingAddressWS.setHost(QStringLiteral("localhost"));
+    bindingAddressWS.setPort(port);
+    bindingAddressWS.setPath(QStringLiteral("/api"));
+    bindingAddressWS.setQuery(query);
     QQmlContext *context = engine.rootContext();
     context->setContextProperty(QStringLiteral("bindingAddress"), bindingAddress);
+    context->setContextProperty(QStringLiteral("bindingAddressWS"), bindingAddressWS);
 
     QFile version("/proc/version");
     if (version.open(QFile::ReadOnly)) {

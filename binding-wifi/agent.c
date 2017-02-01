@@ -23,6 +23,8 @@ static GMainLoop *loop = NULL;
 
 static GDBusNodeInfo *introspection_data = NULL;
 
+GDBusConnection *connectionAgent;
+
 GDBusMethodInvocation *invocation_passkey = NULL;
 
 /* Introspection data for the agent service */
@@ -41,6 +43,7 @@ static const gchar introspection_xml[] = "<node>"
 		"</node>";
 
 callback password_callback;
+callback wifiListChanged_callback;
 
 static void handle_method_call(GDBusConnection *connection, const gchar *sender,
 		const gchar *object_path, const gchar *interface_name,
@@ -52,10 +55,6 @@ static void handle_method_call(GDBusConnection *connection, const gchar *sender,
 		printf("Input requested\n");
 
 		invocation_passkey = invocation;
-
-		//TODO: send the  name of the network to callback
-
-		(*password_callback)(0);
 
 		GVariantIter *array;
 		gchar * object_path;
@@ -81,6 +80,8 @@ static void handle_method_call(GDBusConnection *connection, const gchar *sender,
 		 ]
 		 */
 		printf("Passphrase requested for network : %s\n", object_path);
+        (*password_callback)(0, object_path);
+
 
 	}
 
@@ -97,7 +98,7 @@ static void handle_method_call(GDBusConnection *connection, const gchar *sender,
 		if (g_strcmp0(error_string, "invalid-key") == 0) {
 
 			printf("Passkey is not correct.\n");
-			(*password_callback)(1);
+            (*password_callback)(1, "invalid-key");
 
 		}
 
@@ -142,12 +143,45 @@ static void on_bus_acquired(GDBusConnection *connection, const gchar *name,
 	return NULL;
 }
 
+static void test_signal_handler (GDBusConnection *connection, const gchar *sender_name, const gchar *object_path, const gchar *interface_name, const gchar *signal_name, GVariant *parameters, gpointer user_data) {
+
+    //openlog("WIFI Binder", LOG_PID | LOG_CONS, LOG_USER);
+
+
+    //do not parse, just check what has changed and make callback -
+    // we need to refresh completelist anyway..
+    if (g_strcmp0(signal_name, "PropertiesChanged") == 0) {
+
+        //syslog(LOG_INFO, "PropertiesChanged");
+        (*wifiListChanged_callback)(1, "PropertiesChanged");
+    }
+    else if (g_strcmp0(signal_name, "BSSRemoved") == 0) {
+        //syslog(LOG_INFO, "BSSRemoved" );
+        (*wifiListChanged_callback)(2, "BSSRemoved");
+        }
+
+        else if (g_strcmp0(signal_name, "BSSAdded") == 0) {
+            //syslog(LOG_INFO, "BSSAdded" );
+            (*wifiListChanged_callback)(2, "BSSAdded");
+            }
+    else     printf ("unhandled signal %s %s %s, %s", sender_name, object_path, interface_name, signal_name);//syslog(LOG_INFO, "unhandled signal %s %s %s, %s", sender_name, object_path, interface_name, signal_name);
+
+
+
+    //closelog();
+
+
+
+
+}
+
 void* register_agent(void *data) {
 
-	//printf("Loop start\n");
+    printf("Loop start\n");
 
 	guint owner_id;
-	//MyObject *myobj;
+
+    guint networkChangedID;
 
 	introspection_data = g_dbus_node_info_new_for_xml(introspection_xml, NULL);
 	g_assert(introspection_data != NULL);
@@ -164,6 +198,12 @@ void* register_agent(void *data) {
 			G_BUS_NAME_OWNER_FLAGS_REPLACE, on_bus_acquired, NULL, NULL, NULL,
 			NULL);
 	//G_BUS_NAME_OWNER_FLAGS_NONE G_BUS_NAME_OWNER_FLAGS_ALLOW_REPLACEMENT
+
+
+    //"net.connman.Manager", "ServicesChanged",
+    networkChangedID = g_dbus_connection_signal_subscribe(connectionAgent, NULL, "fi.w1.wpa_supplicant1.Interface", NULL, NULL, NULL, G_DBUS_SIGNAL_FLAGS_NONE, test_signal_handler, NULL, NULL);
+
+    g_assert(networkChangedID !=0);
 
 	loop = g_main_loop_new(NULL, FALSE);
 
@@ -189,7 +229,8 @@ GError* create_agent(GDBusConnection *connection) {
 	int err = -1;
 	pthread_t tid[1];
 
-	//struct callbackData *threadData;
+
+    connectionAgent = connection;
 
 	err = pthread_create((&tid[0]), NULL, register_agent, NULL);
 
@@ -215,11 +256,11 @@ GError* create_agent(GDBusConnection *connection) {
 
 	if (error) {
 		printf("error: %d:%s\n", error->code, error->message);
-
+		
 		return error;
 
 	} else {
-		printf("Agent registered\n");
+        printf("Agent registered\n");
 		return NULL;
 	}
 
@@ -254,9 +295,16 @@ GError* stop_agent(GDBusConnection *connection) {
 
 }
 
-void register_callback(callback callback_function) {
+void register_callbackSecurity(callback callback_function) {
 
 	password_callback = callback_function;
 
 }
+
+void register_callbackWiFiList(callback callback_function) {
+
+    wifiListChanged_callback = callback_function;
+
+}
+
 
