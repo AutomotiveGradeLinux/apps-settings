@@ -185,7 +185,8 @@ SettingPage {
 
             } else if (websocket.status == WebSocket.Closed) {
                 status_str = "Socket closed"
-                //TODO: unsubscribe for events
+                console.log("Socket closed, bye.")
+
             }
 
             console.log(status_str)
@@ -206,6 +207,30 @@ SettingPage {
             verb_str = "deactivate"
             var parameterJson = 'None'
             sendSocketMesage(verb_str, parameterJson)
+
+
+            verb_str = "eventunsub"
+            parameterJson = {
+                tag: 'password'
+            }
+            sendSocketMesage(verb_str, parameterJson)
+
+            verb_str = "eventdel"
+            parameterJson = {
+                tag: 'password'
+            }
+            sendSocketMesage(verb_str, parameterJson)
+
+            verb_str = "eventunsub"
+            parameterJson = {
+            tag: 'networkList'
+            }
+            sendSocketMesage(verb_str, parameterJson)
+
+            verb_str = "eventdel"
+            parameterJson = {
+            tag: 'networkList'
+            }
 
             websocket.active = false
         }

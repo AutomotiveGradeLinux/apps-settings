@@ -585,11 +585,30 @@ static void eventadd (struct afb_req request)
         afb_req_success(request, NULL, NULL);
 }
 
+static void eventdel (struct afb_req request)
+{
+    const char *tag = afb_req_value(request, "tag");
+
+    if (tag == NULL)
+        afb_req_fail(request, "failed", "bad arguments");
+    else if (0 != event_del(tag))
+        afb_req_fail(request, "failed", "deletion error");
+    else
+        afb_req_success(request, NULL, NULL);
+}
+
 static int event_subscribe(struct afb_req request, const char *tag)
 {
     struct event *e;
     e = event_get(tag);
     return e ? afb_req_subscribe(request, e->event) : -1;
+}
+
+static int event_unsubscribe(struct afb_req request, const char *tag)
+{
+    struct event *e;
+    e = event_get(tag);
+    return e ? afb_req_unsubscribe(request, e->event) : -1;
 }
 
 static void eventsub (struct afb_req request)
@@ -604,6 +623,17 @@ static void eventsub (struct afb_req request)
         afb_req_success(request, NULL, NULL);
 }
 
+static void eventunsub (struct afb_req request)
+{
+    const char *tag = afb_req_value(request, "tag");
+
+    if (tag == NULL)
+        afb_req_fail(request, "failed", "bad arguments");
+    else if (0 != event_unsubscribe(request, tag))
+        afb_req_fail(request, "failed", "unsubscription error");
+    else
+        afb_req_success(request, NULL, NULL);
+}
 
 
 /*
@@ -623,11 +653,8 @@ static const struct afb_verb_desc_v1 binding_verbs[] = {
 { .name = "eventadd",     .session = AFB_SESSION_NONE, .callback = eventadd,        .info ="adds the event of 'name' for the 'tag'"},
 { .name = "eventsub",     .session = AFB_SESSION_NONE, .callback = eventsub,        .info ="unsubscribes to the event of 'tag'"},
 { .name = "eventpush",    .session = AFB_SESSION_NONE, .callback = eventpush,       .info ="pushes the event of 'tag' with the 'data'"},
-
-
-
-
-
+{ .name = "eventunsub",   .session = AFB_SESSION_NONE, .callback = eventunsub,      .info ="unsubscribes to the event of 'tag'"},
+{ .name = "eventdel",     .session = AFB_SESSION_NONE, .callback = eventdel,        .info ="deletes the event of 'tag'"},
 
 { .name = NULL } /* marker for end of the array */
 };
