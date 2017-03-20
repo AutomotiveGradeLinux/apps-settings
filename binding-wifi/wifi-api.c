@@ -14,7 +14,7 @@
 */
 
 /**
- * file
+ * \file
  *
  * \brief Implementation of WiFi Binder for AGL's App Framework
  *
@@ -34,8 +34,8 @@
 
 
 
-static int need_password_flag = 0;
-static int password_not_correct_flag = 0;
+static int need_passkey_flag = 0;
+static int passkey_not_correct_flag = 0;
 
 char *passkey;
 callback ptr_my_callback;
@@ -45,12 +45,12 @@ GSList *wifi_list = NULL;
 
 
 /**
- * \brief Read out the passkey from the use and pass it to Agent
+ * \brief Input the passkey for connection to AP.
  *
- * \todo Since I do not know how to subscribe for the events from framework,
- *  it is necessary first to register the password http://IP_ADDRESS:PORT/api/wifi-manager/security?passkey=mypassword.
- *  Then this function is called automatically.
+ * \param[in] passkey pasword for the network
  *
+ * The user should first subscribe for the event 'passkey' and then provide passkey
+ * when this event has been received.
  *
  * */
 void wifi_passkey(struct afb_req request) {
@@ -58,7 +58,7 @@ void wifi_passkey(struct afb_req request) {
 
     const char *passkey_from_user;
 
-    /* retrieves the argument, expects password string */
+    /* retrieves the argument, expects passkey string */
     passkey_from_user = afb_req_value(request, "passkey");
 
     NOTICE(afbitf, "Passkey inserted: %s\n", passkey_from_user);
@@ -70,7 +70,7 @@ void wifi_passkey(struct afb_req request) {
 
         registerPasskey(passkey);
     } else {
-        NOTICE(afbitf, "Please enter the password first\n");
+        NOTICE(afbitf, "Please enter the passkey first\n");
 
     }
 }
@@ -86,7 +86,12 @@ struct event
 
 static struct event *events = 0;
 
-/* searchs the event of tag */
+/**
+ * \internal
+ * \brief Helper function that searches for a specific event.
+ *
+ * \param[in] tag of the event
+ */
 static struct event *event_get(const char *tag)
 {
     struct event *e = events;
@@ -95,34 +100,53 @@ static struct event *event_get(const char *tag)
     return e;
 }
 
-static int event_push(struct json_object *args, const char *tag)
+/**
+ * \internal
+ * \brief Helper function that actually pushes the event.
+ *
+ * \param[in] tag of the event
+ * \param[in] *args json object that contains data for the event
+ *
+ */
+static int do_event_push(struct json_object *args, const char *tag)
 {
     struct event *e;
     e = event_get(tag);
     return e ? afb_event_push(e->event, json_object_get(args)) : -1;
 }
 
+/**
+ * \internal
+ * \brief Pushes the event of 'tag' with the 'data
+ *
+ * \param[in] tag
+ * \param[in] data
+ *
+ */
 static void eventpush (struct afb_req request)
 {
     const char *tag = afb_req_value(request, "tag");
     const char *data = afb_req_value(request, "data");
-    ///data = "mojedata";
     json_object *object = data ? json_tokener_parse(data) : NULL;
 
     if (tag == NULL)
         afb_req_fail(request, "failed", "bad arguments");
-    else if (0 > event_push(object, tag))
+    else if (0 > do_event_push(object, tag))
         afb_req_fail(request, "failed", "push error");
     else
         afb_req_success(request, NULL, NULL);
 }
 
 /**
- * \brief Notify user that password is necessary
+ *
+ * \brief Notify user that passkey is necessary.
+ *
+ * \param[in] number additional integer data produced by Agent
+ * \param[in] asciidata additional ascii data produced by Agent
  *
  * This function is called from the registered agent on RequestInput() call.
  *
- * */
+ */
 void ask_for_passkey(int number, const char* asciidata) {
     NOTICE(afbitf, "Passkey for %s network needed.", asciidata);
     NOTICE(afbitf, "Sending event.");
@@ -136,16 +160,20 @@ void ask_for_passkey(int number, const char* asciidata) {
     json_object_object_add(jresp, "data2", string);
 
 
-    event_push(jresp, "password");
+    do_event_push(jresp, "passkey");
 }
 
 /**
- * \brief Notify GUI that wifi list has changed
+ * \internal
+ * \brief Notify GUI that wifi list has changed.
  *
- * This function is called from the registered agent on RequestInput() call.
- * \todo Subscribe for this event from GUI.
+ * \param[in] number number of event that caused the callback
+ * \param[in] asciidata additional data, e.g "BSSRemoved"
  *
- * */
+ * User should first subscribe for the event 'networkList' and then wait for this event.
+ * When notification comes, update the list if networks by scan_result call.
+ *
+ */
 void wifiListChanged(int number, const char* asciidata) {
 
     //WARNING(afbitf, "wifiListChanged, reason:%d, %s",number, asciidata );
@@ -159,7 +187,7 @@ void wifiListChanged(int number, const char* asciidata) {
     json_object_object_add(jresp, "data1", int1);
     json_object_object_add(jresp, "data2", string);
 
-    event_push(jresp, "networkList");
+    do_event_push(jresp, "networkList");
 
 
 
@@ -167,14 +195,15 @@ void wifiListChanged(int number, const char* asciidata) {
 
 
 /**
- * \brief initialize the binder and activates the WiFi HW, should be called first
+ * \brief Initializes the binder and activates the WiFi HW, should be called first.
+ *
+ * \param[in] request no specific data needed
+ *
+ * \return result of the request, either "success" or "failed" with description of error
  *
  * This will fail if
- * 	- agent for handling password requests cannot be registered
+ * 	- agent for handling passkey requests cannot be registered
  * 	- some error is returned from connman
- *
- *
- * \return result of the request, either "success" or "failed" with description
  */
 static void wifi_activate(struct afb_req request) /*AFB_SESSION_CHECK*/
 {
@@ -211,14 +240,16 @@ static void wifi_activate(struct afb_req request) /*AFB_SESSION_CHECK*/
 }
 
 /**
- * \brief deinitialize the binder and activates the WiFi HW
+ * \brief Deinitializes the binder and deactivates the WiFi HW.
+ *
+ * \param[in] request no specific data needed
+ *
+ * \return result of the request, either "success" or "failed" with description of error
  *
  * This will fail if
- * 	- agent for handling password requests cannot be unregistered
+ * 	- agent for handling passkey requests cannot be unregistered
  * 	- some error is returned from connman
  *
- *
- * \return result of the request, either "success" or "failed" with description
  */
 static void wifi_deactivate(struct afb_req request) /*AFB_SESSION_CHECK*/
 {
@@ -243,9 +274,14 @@ static void wifi_deactivate(struct afb_req request) /*AFB_SESSION_CHECK*/
 }
 
 /**
- * \brief starts scan
+ * \brief Starts scan for access points.
  *
- * \return result of the request, either "success" or "failed" with description
+ * \param[in] request no specific data needed
+ *
+ * \return result of the request, either "success" or "failed" with description of error
+ *
+ * User should first subscribe for the event 'networkList' and then wait for event to come.
+ * When notification comes, update the list of networks by scan_result call.
  */
 void wifi_scan(struct afb_req request) /*AFB_SESSION_NONE*/
 {
@@ -264,10 +300,14 @@ void wifi_scan(struct afb_req request) /*AFB_SESSION_NONE*/
 }
 
 /**
- * \brief return network list
+ * \brief Return network list.
  *
+ * \param[in] request no specific data needed
  *
- * \return result of the request, either "success" or "failed" with description
+ * \return result of the request, either "success" or "failed" with description of error \n
+ * 		   result is array of following json objects: Number, Strength, ESSID, Security, IPAddress, State.
+ * 		   E.g. {"Number":0,"Strength":82,"ESSID":"wifidata02","Security":"ieee8021x","IPAddress":"unsigned","State":"idle"}, or \n
+ * 		   {"Number":1,"Strength":51,"ESSID":"ALCZM","Security":"WPA-PSK","IPAddress":"192.168.1.124","State":"ready"}
  */
 void wifi_scanResult(struct afb_req request) /*AFB_SESSION_CHECK*/
 {
@@ -362,12 +402,16 @@ void wifi_scanResult(struct afb_req request) /*AFB_SESSION_CHECK*/
 }
 
 /**
- * \brief connects to network
+ * \brief Connects to a specific network.
  *
- * \param[in] request number of network to connect to
+ * \param[in] request Number of network to connect to.
  *
- *	 specify number of network to connect to obtained by scan_result() like this,
- *	 http://IP_ADDRESS:PORT/api/wifi-manager/connect?network=1
+ * \return result of the request, either "success" or "failed" with description of error
+ *
+ * Specify number of network to connect to obtained by scan_result().
+ * User should first subscribe for the event 'passkey', if passkey
+ * is needed for connection this event is pushed.
+ *
  */
 void wifi_connect(struct afb_req request) {
 
@@ -414,25 +458,26 @@ void wifi_connect(struct afb_req request) {
 	if (error == NULL)
 		afb_req_success(request, NULL, NULL);
 
-	else if (password_not_correct_flag) {
-		need_password_flag = 0;
-		password_not_correct_flag = 0;
-		afb_req_fail(request, "password-incorrect", NULL);
-	} else if (need_password_flag) {
-		need_password_flag = 0;
-		afb_req_fail(request, "need-password", NULL);
+	else if (passkey_not_correct_flag) {
+		need_passkey_flag = 0;
+		passkey_not_correct_flag = 0;
+		afb_req_fail(request, "passkey-incorrect", NULL);
+	} else if (need_passkey_flag) {
+		need_passkey_flag = 0;
+		afb_req_fail(request, "need-passkey", NULL);
 
 	} else
 		afb_req_fail(request, "failed", error->message);
 }
 
 /**
- * \brief disconnect from network
+ * \brief Disconnects from a network.
  *
  * \param[in] request number of network to disconnect from
  *
- *	 specify number of network to disconnect from obtained by scan_result() like this,
- *	 http://IP_ADDRESS:PORT/api/wifi-manager/discnnect?network=1
+ * \return result of the request, either "success" or "failed" with description of error
+ *
+ * Specify number of network to disconnect from obtained by scan_result().
  */
 void wifi_disconnect(struct afb_req request) {
 
@@ -482,9 +527,11 @@ void wifi_disconnect(struct afb_req request) {
 }
 
 /**
- * \brief return  current status of connection
+ * \brief Return current status of a connection.
  *
- * \return result of the request, either "success" or "failed" with description
+ * \param[in] request no specific data needed
+ *
+ * \return result of the request, either "success" with status or "failed" with description of error
  */
 void wifi_status(struct afb_req request) {
 	int error = 0;
@@ -525,8 +572,14 @@ void wifi_reconnect() {
 
 
 
-
-/* deletes the event of tag */
+/**
+ * \internal
+ * \brief Helper functions that actually delete the tag.
+ *
+ * \param[in] tag tag to delete
+ *
+ * \return result of the request, either "success" or "failed" with description of error
+ */
 static int event_del(const char *tag)
 {
     struct event *e, **p;
@@ -546,7 +599,15 @@ static int event_del(const char *tag)
     return 0;
 }
 
-/* creates the event of tag */
+/**
+ * \internal
+ * \brief Helper functions that actually creates event of the tag.
+ *
+ * \param[in] tag tag to add
+ * \param[in] name name to add
+ *
+ * \return result of the request, either "success" or "failed" with description of error
+ */
 static int event_add(const char *tag, const char *name)
 {
     struct event *e;
@@ -570,6 +631,13 @@ static int event_add(const char *tag, const char *name)
     return 0;
 }
 
+/**
+ * \brief Creates event of the tag.
+ *
+ * \param[in] request tag and name of the event
+ *
+ * \return result of the request, either "success" or "failed" with description of error
+ */
 static void eventadd (struct afb_req request)
 {
     const char *tag = afb_req_value(request, "tag");
@@ -585,6 +653,13 @@ static void eventadd (struct afb_req request)
         afb_req_success(request, NULL, NULL);
 }
 
+/**
+ * \brief Deletes the event of tag.
+ *
+ * \param[in] request tag to delete
+ *
+ * \return result of the request, either "success" or "failed" with description of error
+ */
 static void eventdel (struct afb_req request)
 {
     const char *tag = afb_req_value(request, "tag");
@@ -597,6 +672,15 @@ static void eventdel (struct afb_req request)
         afb_req_success(request, NULL, NULL);
 }
 
+
+/**
+ * \internal
+ * \brief Helper functions to subscribe for the event of tag.
+ *
+ * \param[in] request tag to subscribe for
+ *
+ * \return result of the request, either "success" or "failed" with description of error
+ */
 static int event_subscribe(struct afb_req request, const char *tag)
 {
     struct event *e;
@@ -604,6 +688,14 @@ static int event_subscribe(struct afb_req request, const char *tag)
     return e ? afb_req_subscribe(request, e->event) : -1;
 }
 
+/**
+ * \internal
+ * \brief Helper functions to unsubscribe for the event of tag.
+ *
+ * \param[in] request tag to unsubscribe for
+ *
+ * \return result of the request, either "success" or "failed" with description of error
+ */
 static int event_unsubscribe(struct afb_req request, const char *tag)
 {
     struct event *e;
@@ -611,6 +703,14 @@ static int event_unsubscribe(struct afb_req request, const char *tag)
     return e ? afb_req_unsubscribe(request, e->event) : -1;
 }
 
+
+/**
+ * \brief Subscribes for the event of tag.
+ *
+ * \param[in] request tag to subscribe for
+ *
+ * \return result of the request, either "success" or "failed" with description of error
+ */
 static void eventsub (struct afb_req request)
 {
     const char *tag = afb_req_value(request, "tag");
@@ -623,6 +723,14 @@ static void eventsub (struct afb_req request)
         afb_req_success(request, NULL, NULL);
 }
 
+
+/**
+ * \brief Unsubscribes for the event of tag.
+ *
+ * \param[in] request tag to unsubscribe for
+ *
+ * \return result of the request, either "success" or "failed" with description of error
+ */
 static void eventunsub (struct afb_req request)
 {
     const char *tag = afb_req_value(request, "tag");
@@ -643,7 +751,7 @@ static const struct afb_verb_desc_v1 binding_verbs[] = {
 /* VERB'S NAME     			SESSION MANAGEMENT          	FUNCTION TO CALL  					SHORT DESCRIPTION */
 { .name = "activate", 	  .session = AFB_SESSION_NONE, .callback = wifi_activate, 	.info = "Activate Wi-Fi" },
 { .name = "deactivate",   .session = AFB_SESSION_NONE, .callback = wifi_deactivate, .info ="Deactivate Wi-Fi" },
-{ .name = "scan", 		  .session = AFB_SESSION_NONE, .callback = wifi_scan, 		.info = "Scanning Wi-Fi" },
+{ .name = "scan", 		  .session = AFB_SESSION_NONE, .callback = wifi_scan, 		.info ="Scanning Wi-Fi" },
 { .name = "scan_result",  .session = AFB_SESSION_NONE, .callback = wifi_scanResult,	.info = "Get scan result Wi-Fi" },
 { .name = "connect", 	  .session = AFB_SESSION_NONE, .callback = wifi_connect, 	.info ="Connecting to Access Point" },
 { .name = "status", 	  .session = AFB_SESSION_NONE, .callback = wifi_status, 	.info ="Check connection status" },

@@ -78,7 +78,7 @@ SettingPage {
                     sendSocketMesage(verb_str, parameterJson)
                 }
 
-                else if (eventContent.event === "wifi-manager/passwordQuery") {
+                else if (eventContent.event === "wifi-manager/passkeyQuery") {
 
                     console.debug("Event data:" + eventContent.data.data1 + ", " + eventContent.data.data2 )
                     console.log("Passkey requested")
@@ -155,11 +155,11 @@ SettingPage {
                 sendSocketMesage(verb_str, parameterJson)
 
 
-                //password required event
+                //passkey required event
                 verb_str = "eventadd"
                 parameterJson = {
-                    tag: 'password',
-                    name: 'passwordQuery'
+                    tag: 'passkey',
+                    name: 'passkeyQuery'
                 }
                 sendSocketMesage(verb_str, parameterJson)
 
@@ -167,7 +167,7 @@ SettingPage {
                 //TODO: send this ONLY when OK response is received
                 verb_str = "eventsub"
                 parameterJson = {
-                    tag: 'password'
+                    tag: 'passkey'
                 }
                 sendSocketMesage(verb_str, parameterJson)
 
@@ -211,13 +211,13 @@ SettingPage {
 
             verb_str = "eventunsub"
             parameterJson = {
-                tag: 'password'
+                tag: 'passkey'
             }
             sendSocketMesage(verb_str, parameterJson)
 
             verb_str = "eventdel"
             parameterJson = {
-                tag: 'password'
+                tag: 'passkey'
             }
             sendSocketMesage(verb_str, parameterJson)
 
@@ -418,7 +418,7 @@ SettingPage {
                             var passkey = password.text
                             console.log("Validating", passkey)
 
-                            //just send the password, binder is waiting for it
+                            //just send the passkey, binder is waiting for it
                             verb_str = "insertpasskey"
                             var parameterJson = {
                                 passkey: passkey
