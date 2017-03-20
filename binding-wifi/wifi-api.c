@@ -53,7 +53,7 @@ GSList *wifi_list = NULL;
  * when this event has been received.
  *
  * */
-void wifi_passkey(struct afb_req request) {
+static void insertpasskey(struct afb_req request) {
 
 
     const char *passkey_from_user;
@@ -205,7 +205,7 @@ void wifiListChanged(int number, const char* asciidata) {
  * 	- agent for handling passkey requests cannot be registered
  * 	- some error is returned from connman
  */
-static void wifi_activate(struct afb_req request) /*AFB_SESSION_CHECK*/
+static void activate(struct afb_req request) /*AFB_SESSION_CHECK*/
 {
 	json_object *jresp;
 	GError *error = NULL;
@@ -251,7 +251,7 @@ static void wifi_activate(struct afb_req request) /*AFB_SESSION_CHECK*/
  * 	- some error is returned from connman
  *
  */
-static void wifi_deactivate(struct afb_req request) /*AFB_SESSION_CHECK*/
+static void deactivate(struct afb_req request) /*AFB_SESSION_CHECK*/
 {
 
 	json_object *jresp;
@@ -283,7 +283,7 @@ static void wifi_deactivate(struct afb_req request) /*AFB_SESSION_CHECK*/
  * User should first subscribe for the event 'networkList' and then wait for event to come.
  * When notification comes, update the list of networks by scan_result call.
  */
-void wifi_scan(struct afb_req request) /*AFB_SESSION_NONE*/
+static void scan(struct afb_req request) /*AFB_SESSION_NONE*/
 {
 	GError *error = NULL;
 
@@ -309,7 +309,7 @@ void wifi_scan(struct afb_req request) /*AFB_SESSION_NONE*/
  * 		   E.g. {"Number":0,"Strength":82,"ESSID":"wifidata02","Security":"ieee8021x","IPAddress":"unsigned","State":"idle"}, or \n
  * 		   {"Number":1,"Strength":51,"ESSID":"ALCZM","Security":"WPA-PSK","IPAddress":"192.168.1.124","State":"ready"}
  */
-void wifi_scanResult(struct afb_req request) /*AFB_SESSION_CHECK*/
+static void scan_result(struct afb_req request) /*AFB_SESSION_CHECK*/
 {
 	struct wifi_profile_info *wifiProfile = NULL;
 	GSList *list = NULL;
@@ -413,7 +413,7 @@ void wifi_scanResult(struct afb_req request) /*AFB_SESSION_CHECK*/
  * is needed for connection this event is pushed.
  *
  */
-void wifi_connect(struct afb_req request) {
+static void connect(struct afb_req request) {
 
 	struct wifi_profile_info *wifiProfileToConnect = NULL;
 
@@ -479,7 +479,7 @@ void wifi_connect(struct afb_req request) {
  *
  * Specify number of network to disconnect from obtained by scan_result().
  */
-void wifi_disconnect(struct afb_req request) {
+static void disconnect(struct afb_req request) {
 
 	struct wifi_profile_info *wifiProfileToConnect = NULL;
 
@@ -533,7 +533,7 @@ void wifi_disconnect(struct afb_req request) {
  *
  * \return result of the request, either "success" with status or "failed" with description of error
  */
-void wifi_status(struct afb_req request) {
+static void status(struct afb_req request) {
 	int error = 0;
 	wifi_list = NULL;
 	struct wifiStatus *status;
@@ -566,7 +566,7 @@ void wifi_status(struct afb_req request) {
 	}
 }
 
-void wifi_reconnect() {
+static void reconnect() {
     /*TBD*/
 }
 
@@ -749,20 +749,20 @@ static void eventunsub (struct afb_req request)
  */
 static const struct afb_verb_desc_v1 binding_verbs[] = {
 /* VERB'S NAME     			SESSION MANAGEMENT          	FUNCTION TO CALL  					SHORT DESCRIPTION */
-{ .name = "activate", 	  .session = AFB_SESSION_NONE, .callback = wifi_activate, 	.info = "Activate Wi-Fi" },
-{ .name = "deactivate",   .session = AFB_SESSION_NONE, .callback = wifi_deactivate, .info ="Deactivate Wi-Fi" },
-{ .name = "scan", 		  .session = AFB_SESSION_NONE, .callback = wifi_scan, 		.info ="Scanning Wi-Fi" },
-{ .name = "scan_result",  .session = AFB_SESSION_NONE, .callback = wifi_scanResult,	.info = "Get scan result Wi-Fi" },
-{ .name = "connect", 	  .session = AFB_SESSION_NONE, .callback = wifi_connect, 	.info ="Connecting to Access Point" },
-{ .name = "status", 	  .session = AFB_SESSION_NONE, .callback = wifi_status, 	.info ="Check connection status" },
-{ .name = "disconnect",   .session = AFB_SESSION_NONE, .callback = wifi_disconnect, .info ="Disconnecting connection" },
-{ .name = "reconnect", 	  .session = AFB_SESSION_NONE, .callback = wifi_reconnect, 	.info ="Reconnecting to Access Point" },
-{ .name = "insertpasskey",.session = AFB_SESSION_NONE, .callback = wifi_passkey,    .info ="inputs the passkey after it has been requsted"},
-{ .name = "eventadd",     .session = AFB_SESSION_NONE, .callback = eventadd,        .info ="adds the event of 'name' for the 'tag'"},
-{ .name = "eventsub",     .session = AFB_SESSION_NONE, .callback = eventsub,        .info ="unsubscribes to the event of 'tag'"},
-{ .name = "eventpush",    .session = AFB_SESSION_NONE, .callback = eventpush,       .info ="pushes the event of 'tag' with the 'data'"},
-{ .name = "eventunsub",   .session = AFB_SESSION_NONE, .callback = eventunsub,      .info ="unsubscribes to the event of 'tag'"},
-{ .name = "eventdel",     .session = AFB_SESSION_NONE, .callback = eventdel,        .info ="deletes the event of 'tag'"},
+{ .name = "activate", 	  .session = AFB_SESSION_NONE, .callback = activate, 	   .info = "Activate Wi-Fi" },
+{ .name = "deactivate",   .session = AFB_SESSION_NONE, .callback = deactivate,     .info ="Deactivate Wi-Fi" },
+{ .name = "scan", 		  .session = AFB_SESSION_NONE, .callback = scan, 		   .info ="Scanning Wi-Fi" },
+{ .name = "scan_result",  .session = AFB_SESSION_NONE, .callback = scan_result,	   .info = "Get scan result Wi-Fi" },
+{ .name = "connect", 	  .session = AFB_SESSION_NONE, .callback = connect, 	   .info ="Connecting to Access Point" },
+{ .name = "status", 	  .session = AFB_SESSION_NONE, .callback = status, 	       .info ="Check connection status" },
+{ .name = "disconnect",   .session = AFB_SESSION_NONE, .callback = disconnect,     .info ="Disconnecting connection" },
+{ .name = "reconnect", 	  .session = AFB_SESSION_NONE, .callback = reconnect, 	   .info ="Reconnecting to Access Point" },
+{ .name = "insertpasskey",.session = AFB_SESSION_NONE, .callback = insertpasskey,  .info ="inputs the passkey after it has been requsted"},
+{ .name = "eventadd",     .session = AFB_SESSION_NONE, .callback = eventadd,       .info ="adds the event of 'name' for the 'tag'"},
+{ .name = "eventsub",     .session = AFB_SESSION_NONE, .callback = eventsub,       .info ="unsubscribes to the event of 'tag'"},
+{ .name = "eventpush",    .session = AFB_SESSION_NONE, .callback = eventpush,      .info ="pushes the event of 'tag' with the 'data'"},
+{ .name = "eventunsub",   .session = AFB_SESSION_NONE, .callback = eventunsub,     .info ="unsubscribes to the event of 'tag'"},
+{ .name = "eventdel",     .session = AFB_SESSION_NONE, .callback = eventdel,       .info ="deletes the event of 'tag'"},
 
 { .name = NULL } /* marker for end of the array */
 };
