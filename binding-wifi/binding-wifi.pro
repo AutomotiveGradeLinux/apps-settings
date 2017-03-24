@@ -1,4 +1,4 @@
-TARGET = serttings-wifi-binding
+TARGET = settings-wifi-binding
 
 HEADERS = wifi-api.h wifi-connman.h
 SOURCES = agent.c wifi-api.c wifi-connman.c

@@ -6,6 +6,13 @@
   <description>This is the settings application for date &amp; time, wifi and bluetooth</description>
   <author>Tasuku Suzuki &lt;tasuku.suzuki@qt.io&gt;</author>
   <license>APL 2.0</license>
+  <feature name="urn:AGL:widget:required-api">
+    <param name="lib/libsettings-wifi-binding.so" value="local" />
+    <param name="lib/libsettings-bluetooth-binding.so" value="local" />
+  </feature>
+  <feature name="urn:AGL:widget:required-permission">
+    <param name="urn:AGL:permission::public:no-htdocs" value="required" />
+  </feature>
 </widget>
 
 
