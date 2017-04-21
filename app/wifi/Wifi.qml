@@ -27,6 +27,8 @@ SettingPage {
     icon: '/wifi/images/HMI_Settings_WifiIcon.svg'
     title: 'Wifi'
     checkable: true
+    readonly property bool isWifi: true
+    property bool isInitializing: true
 
     property string wifiAPIpath: bindingAddress + '/wifi-manager/'
     //http://localhost:12345/api
@@ -47,6 +49,8 @@ SettingPage {
     }
     property string request_str: ""
     property string status_str: ""
+
+
 
     WebSocket {
         id: websocket
@@ -122,6 +126,13 @@ SettingPage {
                     }
 
                 }
+                else if (verb_str == "status") {
+
+                    var status = "OFF"
+                    status =  (message_json[2].response).Power
+
+                    checked = (status === "ON") ? true : false
+              }
             } else
                 console.log("Unhadled websocket message", message_json[0])
         }
@@ -136,7 +147,35 @@ SettingPage {
             } else if (websocket.status == WebSocket.Open) {
                 status_str = "Socket opened; sending message..."
 
+                //first get the status
+                verb_str = "status"
+                parameterJson = 'None'
+                sendSocketMesage(verb_str, parameterJson)
+
+
+
+            } else if (websocket.status == WebSocket.Closed) {
+                status_str = "Socket closed"
+                console.log("Socket closed, bye.")
+
+                websocket.active = false
+
+            }
+
+            console.log(status_str)
+        }
+        active: false
+    }
+
+    onCheckedChanged: {
+        console.log("Wifi set to", checked)
+
+        if (websocket.active) {
+
+            if (checked == true) {
+
                 //subscribe for events
+                var parameterJson
 
                 //network list updated event
                 verb_str = "eventadd"
@@ -182,58 +221,50 @@ SettingPage {
                 parameterJson = 'None'
                 sendSocketMesage(verb_str, parameterJson)
 
+            } else {
 
-            } else if (websocket.status == WebSocket.Closed) {
-                status_str = "Socket closed"
-                console.log("Socket closed, bye.")
+                if (!isInitializing) {
 
-            }
+                    networkList.clear()
 
-            console.log(status_str)
+                    verb_str = "deactivate"
+                    parameterJson = 'None'
+                    sendSocketMesage(verb_str, parameterJson)
+
+
+                    verb_str = "eventunsub"
+                    parameterJson = {
+                        tag: 'passkey'
+                    }
+                    sendSocketMesage(verb_str, parameterJson)
+
+                    verb_str = "eventdel"
+                    parameterJson = {
+                        tag: 'passkey'
+                    }
+                    sendSocketMesage(verb_str, parameterJson)
+
+                    verb_str = "eventunsub"
+                    parameterJson = {
+                    tag: 'networkList'
+                    }
+                    sendSocketMesage(verb_str, parameterJson)
+
+                    verb_str = "eventdel"
+                    parameterJson = {
+                    tag: 'networkList'
+                }
+
+                }
+             }
+            isInitializing = false
         }
-        active: false
-    }
 
-    onCheckedChanged: {
-        console.log("Wifi set to", checked)
-
-        if (checked == true) {
-            //activating is done when socket is opened
+        else {
+            console.log("Websocket not active.")
             websocket.active = true
-
-        } else {
-            networkList.clear()
-
-            verb_str = "deactivate"
-            var parameterJson = 'None'
-            sendSocketMesage(verb_str, parameterJson)
-
-
-            verb_str = "eventunsub"
-            parameterJson = {
-                tag: 'passkey'
-            }
-            sendSocketMesage(verb_str, parameterJson)
-
-            verb_str = "eventdel"
-            parameterJson = {
-                tag: 'passkey'
-            }
-            sendSocketMesage(verb_str, parameterJson)
-
-            verb_str = "eventunsub"
-            parameterJson = {
-            tag: 'networkList'
-            }
-            sendSocketMesage(verb_str, parameterJson)
-
-            verb_str = "eventdel"
-            parameterJson = {
-            tag: 'networkList'
-            }
-
-            websocket.active = false
         }
+
 
 
     }
@@ -442,6 +473,10 @@ SettingPage {
                 target: activeFocusControl
             }
         }
+    }
+
+    function activateWifi(){
+        websocket.active = true
     }
 
 }
