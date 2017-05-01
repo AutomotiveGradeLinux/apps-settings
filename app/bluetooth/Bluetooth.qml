@@ -25,6 +25,7 @@ SettingPage {
     icon: '/bluetooth/images/HMI_Settings_BluetoothIcon.svg'
     title: 'Bluetooth'
     checkable: true
+    readonly property bool isBluetooth: true
 
     property string btAPIpath: bindingAddress + '/Bluetooth-manager/'
     property var jsonObjectBT: []
@@ -429,6 +430,15 @@ SettingPage {
           model: btDeviceList
           delegate: blueToothDevice
           clip: true
+      }
+
+      function checkBluetooth() {
+          request(btAPIpath + 'power', function (o) {
+                // log the json response
+                var msg = JSON.parse(o.responseText)
+                console.log(o.responseText)
+                checked = msg.response.power == "on"
+          })
       }
 
       function findDevice(address){

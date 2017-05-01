@@ -50,6 +50,7 @@ ApplicationWindow {
                     settingsModel.append({'icon': app.icon, 'title': app.title, 'checkable': app.checkable, 'app': app})
                     app.visible = false
 
+                    if (app.isBluetooth) app.checkBluetooth()
                     if (app.isWifi) app.activateWifi()
                 }
             }
