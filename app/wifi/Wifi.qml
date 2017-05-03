@@ -253,7 +253,8 @@ SettingPage {
                     verb_str = "eventdel"
                     parameterJson = {
                     tag: 'networkList'
-                }
+                    }
+                    sendSocketMesage(verb_str, parameterJson)
 
                 }
              }
