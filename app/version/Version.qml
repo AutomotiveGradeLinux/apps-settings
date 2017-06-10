@@ -55,7 +55,7 @@ SettingPage {
                 font.pixelSize: 48
             }
             Label {
-                text: '3.0 (Charming Chinook)'
+                text: '4.0 (Daring Dab)'
                 font.pixelSize: 48
                 Layout.fillWidth: true
             }
