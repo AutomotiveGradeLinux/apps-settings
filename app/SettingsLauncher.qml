@@ -63,6 +63,10 @@ Page {
                         checkedSwitch.checked = model.app.checked
                     }
                 }
+
+                Component.onCompleted: {
+                    checkedSwitch.checked = model.app.checked
+                }
             }
             Image {
                 source: '../images/HMI_Settings_DividingLine.svg'
