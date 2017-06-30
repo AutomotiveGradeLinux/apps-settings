@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
-SUBDIRS = app binding-wifi binding-bluetooth package
-package.depends += app binding-wifi binding-bluetooth
+SUBDIRS = app package
+package.depends += app
