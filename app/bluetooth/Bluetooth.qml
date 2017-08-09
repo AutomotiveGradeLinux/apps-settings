@@ -103,59 +103,10 @@ SettingPage {
                 if (verb_str == "connect"){
                     WebSocket.sendTextMessage (request_str)
                 }
-
-                verb_str = "eventadd"
-                parameterJson = {
-                    tag: 'device_updated',
-                    name: 'device_updated'
-                }
-                sendSocketMesage(verb_str, parameterJson)
-
-                verb_str = "eventsub"
-                parameterJson = {
-                    tag: 'device_updated'
-                }
-                sendSocketMesage(verb_str, parameterJson)
-
-                verb_str = "eventadd"
-                parameterJson = {
-                    tag: 'device_added',
-                    name: 'device_added'
-                }
-                sendSocketMesage(verb_str, parameterJson)
-
-                verb_str = "eventsub"
-                parameterJson = {
-                    tag: 'device_added'
-                }
-                sendSocketMesage(verb_str, parameterJson)
-
-                verb_str = "eventadd"
-                parameterJson = {
-                    tag: 'device_removed',
-                    name: 'device_removed'
-                }
-                sendSocketMesage(verb_str, parameterJson)
-
-                verb_str = "eventsub"
-                parameterJson = {
-                    tag: 'device_removed'
-                }
-                sendSocketMesage(verb_str, parameterJson)
-
-                verb_str = "eventadd"
-                parameterJson = {
-                    tag: 'request_confirmation',
-                    name: 'request_confirmation'
-                }
-                sendSocketMesage(verb_str, parameterJson)
-
-                verb_str = "eventsub"
-                parameterJson = {
-                    tag: 'request_confirmation'
-                }
-                sendSocketMesage(verb_str, parameterJson)
-
+                sendSocketMesage("subscribe", { value: "device_updated" })
+                sendSocketMesage("subscribe", { value: "device_added" })
+                sendSocketMesage("subscribe", { value: "device_removed" })
+                sendSocketMesage("subscribe", { value: "request_confirmation" })
             } else if (websocket.status == WebSocket.Closed) {
                 status_str = "Socket closed"
             }
