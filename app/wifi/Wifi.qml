@@ -71,18 +71,17 @@ SettingPage {
 
                 console.log("Received EVENT: " + eventContent.event)
 
-                if (eventContent.event === "wifi-manager/networkListUpdated") {
+                if (eventContent.event === "wifi-manager/networkList") {
 
                     console.debug("Event data:" + eventContent.data.data1 + ", " + eventContent.data.data2 )
                     console.log("Network List was updated, sending scan_result request")
 
                     //update network list
                     verb_str = "scan_result"
-                    var parameterJson = 'None'
-                    sendSocketMesage(verb_str, parameterJson)
+                    sendSocketMesage(verb_str, 'None')
                 }
 
-                else if (eventContent.event === "wifi-manager/passkeyQuery") {
+                else if (eventContent.event === "wifi-manager/passkey") {
 
                     console.debug("Event data:" + eventContent.data.data1 + ", " + eventContent.data.data2 )
                     console.log("Passkey requested")
@@ -175,87 +174,22 @@ SettingPage {
             if (checked == true) {
 
                 //subscribe for events
-                var parameterJson
-
-                //network list updated event
-                verb_str = "eventadd"
-                parameterJson = {
-                    tag: 'networkList',
-                    name: 'networkListUpdated'
-                }
-                sendSocketMesage(verb_str, parameterJson)
-
-
-                //TODO: send this ONLY when OK response is received
-                verb_str = "eventsub"
-                parameterJson = {
-                    tag: 'networkList'
-                }
-                sendSocketMesage(verb_str, parameterJson)
-
-
-                //passkey required event
-                verb_str = "eventadd"
-                parameterJson = {
-                    tag: 'passkey',
-                    name: 'passkeyQuery'
-                }
-                sendSocketMesage(verb_str, parameterJson)
-
-
-                //TODO: send this ONLY when OK response is received
-                verb_str = "eventsub"
-                parameterJson = {
-                    tag: 'passkey'
-                }
-                sendSocketMesage(verb_str, parameterJson)
-
-
-                verb_str = "activate"
-                parameterJson = 'None'
-                sendSocketMesage(verb_str, parameterJson)
-
+                sendSocketMesage("subscribe", { value: "networkList" })
+                sendSocketMesage("subscribe", { value: "passkey" })
+                sendSocketMesage("activate", 'None')
 
                 //get scan results right away
                 verb_str = "scan_result"
-                parameterJson = 'None'
-                sendSocketMesage(verb_str, parameterJson)
+                sendSocketMesage(verb_str, 'None')
 
             } else {
 
                 if (!isInitializing) {
-
                     networkList.clear()
 
-                    verb_str = "deactivate"
-                    parameterJson = 'None'
-                    sendSocketMesage(verb_str, parameterJson)
-
-
-                    verb_str = "eventunsub"
-                    parameterJson = {
-                        tag: 'passkey'
-                    }
-                    sendSocketMesage(verb_str, parameterJson)
-
-                    verb_str = "eventdel"
-                    parameterJson = {
-                        tag: 'passkey'
-                    }
-                    sendSocketMesage(verb_str, parameterJson)
-
-                    verb_str = "eventunsub"
-                    parameterJson = {
-                    tag: 'networkList'
-                    }
-                    sendSocketMesage(verb_str, parameterJson)
-
-                    verb_str = "eventdel"
-                    parameterJson = {
-                    tag: 'networkList'
-                    }
-                    sendSocketMesage(verb_str, parameterJson)
-
+                    sendSocketMesage("deactivate", 'None')
+                    sendSocketMesage("unsubscribe", { value: "passkey" })
+                    sendSocketMesage("unsubscribe", { value: "networkList" })
                 }
              }
             isInitializing = false
