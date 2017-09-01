@@ -47,6 +47,8 @@ SettingPage {
     }
     property string request_str: ""
     property string status_str: ""
+    property int pairedDeviceCount
+    property bool btOn:false
 
     WebSocket {
         id: websocket
@@ -66,7 +68,20 @@ SettingPage {
                     //btDeviceList.clear()
                     console.log("BT list refreshed")
                     initDevice = 'Y'
-                    btDeviceList.append({
+                    if(eventContent.data.Paired==="True"){
+                        pairedDeviceList.append({
+                                        deviceAddress: eventContent.data.Address,
+                                        deviceName: eventContent.data.Name,
+                                        devicePairable:eventContent.data.Paired,
+                                        deviceConnect: eventContent.data.Connected,
+                                        connectAVP: eventContent.data.AVPConnected,
+                                        connectHFP: eventContent.data.HFPConnected,
+                                        textToShow: ""
+                                    })
+                        pairedDeviceCount=pairedDeviceCount+1
+                    }
+                  else
+                        btDeviceList.append({
                                         deviceAddress: eventContent.data.Address,
                                         deviceName: eventContent.data.Name,
                                         devicePairable:eventContent.data.Paired,
@@ -78,6 +93,10 @@ SettingPage {
                 } else if(eventContent.event === "Bluetooth-Manager/device_removed"){
                   if (findDevice(eventContent.data.Address) >= 0){
                       btDeviceList.remove(findDevice(eventContent.data.Address))
+                  }
+                  else if(findPairDevice(eventContent.data.Address) >= 0){
+                      pairedDeviceList.remove(findPairDevice(eventContent.data.Address))
+                      pairedDeviceCount=pairedDeviceCount-1
                   }
                 } else if(eventContent.event === "Bluetooth-Manager/device_updated"){
                   updateDeviceAttribute(eventContent.data)
@@ -126,6 +145,8 @@ SettingPage {
         console.log("Bluetooth set to", checked)
         if (checked == true) {
             initBTlist()
+            pairedDeviceCount=0
+            btOn=true
             request(btAPIpath + 'power?value=1', function (o) {
                 // log the json response
                 console.log(o.responseText)
@@ -146,6 +167,9 @@ SettingPage {
 
         } else {
             btDeviceList.clear()
+            pairedDeviceList.clear()
+            pairedDeviceCount=0
+            btOn=false
             request(btAPIpath + 'stop_discovery', function (o) {
                // log the json response
                console.log(o.responseText)
@@ -166,10 +190,13 @@ SettingPage {
                            + verb, parameter]
         websocket.sendTextMessage(JSON.stringify(requestJson))
     }
-
+    ListModel {
+      id: pairedDeviceList
+    }
     ListModel {
       id: btDeviceList
     }
+
 
     Rectangle {
       anchors.horizontalCenter: parent.horizontalCenter
@@ -249,9 +276,6 @@ SettingPage {
                         property string connectionState:""
                         text: {
                           if ((devicePairable === "True")
-                                 && (deviceConnect === "False"))
-                                 text = ", paired"
-                          else if ((devicePairable === "True")
                                    && (deviceConnect === "True")
                                    && (connectAVP === "True")
                                    && (connectHFP === "False"))
@@ -302,16 +326,19 @@ SettingPage {
                      anchors.right: parent.right
                      anchors.rightMargin: 100
 
-                     text: "Unpair"
+                     text: "Remove"
                      MouseArea {
                          anchors.fill: parent
                          onClicked: {
                              request(btAPIpath + 'remove_device?value=' + deviceAddress, function (o) {
                                  console.log(o.responseText)
                              })
-                             if (findDevice(deviceAddress) >= 0){
+                             if (findDevice(deviceAddress) >= 0)
                                 btDeviceList.remove(findDevice(deviceAddress))
-                             }
+                             else if (findPairDevice(deviceAddress) >= 0){
+                                 pairedDeviceList.remove(findPairDevice(deviceAddress))
+                                 pairedDeviceCount=pairedDeviceCount-1
+                                 }
                          }
                      }
                  }
@@ -361,21 +388,71 @@ SettingPage {
                 }
              }
 
-             Image {
+           /*  Image {
                  source: '../images/HMI_Settings_DividingLine.svg'
                  anchors.horizontalCenter: parent.horizontalCenter
                  anchors.top: parent.top
                  anchors.topMargin: -15
 
                  visible: model.index > 0
-             }
+             }*/
           }
       }
-
-      ListView {
+      Text {
+          id: pairedlabel
           width: parent.width
           anchors.top: parent.top
-          anchors.topMargin: 70
+          anchors.topMargin: 50
+          anchors.left: parent.left
+          anchors.leftMargin: 80
+          height: 80
+          color:'grey'
+          font.pixelSize: 30
+          text:{
+              if(btOn == true && pairedDeviceCount!=0)
+                  "LIST OF PAIRED DEVICES"
+              else
+                  ""
+          }
+      }
+      ListView{
+          id: pairedListView
+          width: parent.width
+          anchors.top: pairedlabel.bottom
+          anchors.bottom: pairedlabel.bottom
+          anchors.bottomMargin: (-120*pairedDeviceCount)
+          model: pairedDeviceList
+          delegate: blueToothDevice
+          clip: true
+      }
+      Image {
+          anchors.bottom: pairedListView.bottom
+          anchors.left: parent.left
+          anchors.leftMargin: 80
+          height: 5
+          source: (btOn == true && pairedDeviceCount!=0)?'../images/HMI_Settings_DividingLine.svg':''
+      }
+      Text {
+          id: detectedlabel
+          width: parent.width
+          anchors.top: pairedListView.bottom
+          anchors.topMargin: (pairedDeviceCount!=0)? 80:-80
+          anchors.left: parent.left
+          anchors.leftMargin: 80
+          height: 80
+          color:'grey'
+          font.pixelSize: 30
+          text: {
+              if (btOn == true)
+                  "LIST OF DETECTED DEVICES"
+              else
+                  ""
+          }
+      }
+      ListView {
+          id:listView2
+          width: parent.width
+          anchors.top: detectedlabel.bottom
           anchors.bottom: parent.bottom
           anchors.bottomMargin: 150
           model: btDeviceList
@@ -400,55 +477,97 @@ SettingPage {
               }
           return -1
       }
+      function findPairDevice(address){
+          for (var i = 0; i < pairedDeviceList.count; i++) {
+              if (address === pairedDeviceList.get(i).deviceAddress){
+                  return i
+                  }
+              }
+          return -1
+      }
 
       function updateDeviceAttribute(data){
             var text = ""
             for (var i = 0; i < btDeviceList.count; i++) {
                 if (data.Address === btDeviceList.get(i).deviceAddress){
                     btDeviceList.get(i).devicePairable = data.Paired
-                    if (data.Paired == "True")
+                    if (data.Paired === "True")
                     {
-                        console.log("connectButton  " + btDeviceList.get(i).btStatus)
+                        //console.log("connectButton  " + btDeviceList.get(i).btStatus)
                         //ALCZbtDeviceList.get(i).connectButton.text = "Connect"
+                        pairedDeviceList.append({
+                                        deviceAddress: btDeviceList.get(i).deviceAddress,
+                                        deviceName: btDeviceList.get(i).deviceName,
+                                        devicePairable:btDeviceList.get(i).devicePairable,
+                                        deviceConnect: btDeviceList.get(i).deviceConnect,
+                                        connectAVP: btDeviceList.get(i).connectAVP,
+                                        connectHFP: btDeviceList.get(i).connectHFP,
+                                        textToShow: ""
+                                    })
+                        pairedDeviceCount=pairedDeviceCount+1
+                        btDeviceList.remove(i,1)
+                        btDeviceList.layoutChanged()
                     }
-
-                    if ((data.Paired === "True")
-                               && (data.Connected === "False"))
-                        text = ", paired"
-                    else if ((data.Paired === "True")
-                               && (data.Connected === "True")
-                               && (data.AVPConnected === "True")
-                               && (data.HFPConnected === "False"))
-                        text = "AV Connection, "
-                    else if ((data.Paired === "True")
-                                && (data.Connected === "True")
-                                && (data.HFPConnected === "True")
-                                && (data.AVPConnected === "False"))
-                        text = "Handsfree Connection, "
-                    else if ((data.Paired === "True")
-                                && (data.Connected === "True")
-                                && (data.HFPConnected === "True")
-                                && (data.AVPConnected === "True")) {
-                        console.log("all connected!!")
-                        text = ", Handsfree & AV Connection"}
-                    else
-                        text = ""
-
-                    btDeviceList.set(i, {
+                    else{
+                        text=deviceConnectionAttribute(data)
+                        btDeviceList.set(i, {
                                             textToShow: " " + text
                                         })
-                    console.log("iamhere" + btDeviceList.get(i).deviceAddress + data.Paired)
+                        console.log("iamhere" + btDeviceList.get(i).deviceAddress + data.Paired)
 
-                    //btDeviceList.get(i).btStatus = text + btDeviceList.get(i).deviceAddress //btDeviceList.get(i).textToShow
-                    btDeviceList.layoutChanged()
+                        //btDeviceList.get(i).btStatus = text + btDeviceList.get(i).deviceAddress //btDeviceList.get(i).textToShow
+                        btDeviceList.layoutChanged()
 
-                    btDeviceList.get(i).deviceConnect = data.Connected
-                    console.log(data.Connected)
+                        btDeviceList.get(i).deviceConnect = data.Connected
+                        console.log(data.Connected)
+                    }
+
               }
           }
+            for (var i = 0; i < pairedDeviceList.count; i++) {
+               if(data.Address === pairedDeviceList.get(i).deviceAddress){
+                    pairedDeviceList.get(i).devicePairable = data.Paired
+
+                    text=deviceConnectionAttribute(data)
+                    pairedDeviceList.set(i, {
+                                            textToShow: " " + text
+                                        })
+                // console.log("iamhere" + btDeviceList.get(i).deviceAddress + data.Paired)
+
+                  //btDeviceList.get(i).btStatus = text + btDeviceList.get(i).deviceAddress //btDeviceList.get(i).textToShow
+                    pairedDeviceList.layoutChanged()
+
+                    pairedDeviceList.get(i).deviceConnect = data.Connected
+                //  console.log(data.Connected)
+               }
+            }
         }
 
+      function deviceConnectionAttribute(data){
+          var text=""
+          if ((data.Paired === "True")
+                     && (data.Connected === "True")
+                     && (data.AVPConnected === "True")
+                     && (data.HFPConnected === "False"))
+              text = "AV Connection, "
+          else if ((data.Paired === "True")
+                      && (data.Connected === "True")
+                      && (data.HFPConnected === "True")
+                      && (data.AVPConnected === "False"))
+              text = "Handsfree Connection, "
+          else if ((data.Paired === "True")
+                      && (data.Connected === "True")
+                      && (data.HFPConnected === "True")
+                      && (data.AVPConnected === "True")) {
+              console.log("all connected!!")
+              text = ", Handsfree & AV Connection"}
+          else
+              text = ""
+          return text
+      }
+
       function initBTlist(){
+          pairedDeviceCount=0
           request(btAPIpath + 'discovery_result', function (o) {
 
               // log the json response
@@ -464,9 +583,10 @@ SettingPage {
 
               //console.log(jsonObject.response)
               for (var i = 0; i < jsonObjectBT.length; i++) {
-              initDevice = 'Y'
-              console.log(jsonObjectBT[i].Paired)
-              btDeviceList.append({
+               initDevice = 'Y'
+               console.log(jsonObjectBT[i].Paired)
+               if(jsonObjectBT[i].Paired==="True"){
+                      pairedDeviceList.append({
                                       deviceAddress: jsonObjectBT[i].Address,
                                       deviceName: jsonObjectBT[i].Name,
                                       devicePairable:jsonObjectBT[i].Paired,
@@ -474,6 +594,18 @@ SettingPage {
                                       connectAVP: jsonObjectBT[i].AVPConnected,
                                       connectHFP: jsonObjectBT[i].HFPConnected,
                                       textToShow: ""
+                                  })
+                      pairedDeviceCount=pairedDeviceCount+1
+                  }
+                else
+                      btDeviceList.append({
+                                       deviceAddress: jsonObjectBT[i].Address,
+                                       deviceName: jsonObjectBT[i].Name,
+                                       devicePairable:jsonObjectBT[i].Paired,
+                                       deviceConnect: jsonObjectBT[i].Connected,
+                                       connectAVP: jsonObjectBT[i].AVPConnected,
+                                       connectHFP: jsonObjectBT[i].HFPConnected,
+                                       textToShow: ""
                                   })
              }
           })
