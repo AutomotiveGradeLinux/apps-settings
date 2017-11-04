@@ -55,7 +55,7 @@ SettingPage {
                 font.pixelSize: 48
             }
             Label {
-                text: '4.0 (Daring Dab)'
+                text: '5.0.0rc2 (Electric Eel)'
                 font.pixelSize: 48
                 Layout.fillWidth: true
             }
