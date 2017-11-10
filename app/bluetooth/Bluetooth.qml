@@ -265,9 +265,16 @@ SettingPage {
                  Column {
                      anchors.left: parent.left
                      anchors.leftMargin: 80
+                     TextMetrics {
+                        id: textMetrics
+                        font.family: "Arial"
+                        elide: Text.ElideRight
+                        elideWidth: 140
+                        text: deviceName
+                     }
                      Text {
                         id: btName
-                        text: deviceName
+                        text: textMetrics.elidedText
                         color: '#66FF99'
                         font.pixelSize: 48
                      }
