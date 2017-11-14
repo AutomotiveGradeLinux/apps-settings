@@ -3,6 +3,9 @@ QT = quickcontrols2 dbus
 
 SOURCES = main.cpp
 
+CONFIG += link_pkgconfig
+PKGCONFIG += libhomescreen qlibwindowmanager
+
 RESOURCES += \ 
     settings.qrc \
     images/images.qrc \
