@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2016 The Qt Company Ltd.
+ * Copyright (C) 2017 Konsulko Group
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +25,9 @@
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlContext>
 #include <QtQuickControls2/QQuickStyle>
-
-#ifdef HAVE_LIBHOMESCREEN
+#include <QQuickWindow>
 #include <libhomescreen.hpp>
-#endif
+#include <qlibwindowmanager.h>
 
 class DBus : public QObject
 {
@@ -48,17 +48,10 @@ private:
 
 int main(int argc, char *argv[])
 {
-#ifdef HAVE_LIBHOMESCREEN
-    LibHomeScreen libHomeScreen;
-
-    if (!libHomeScreen.renderAppToAreaAllowed(0, 1)) {
-        qWarning() << "renderAppToAreaAllowed is denied";
-        return -1;
-    }
-#endif
+    QString myname = QString("Settings");
 
     QGuiApplication app(argc, argv);
-    app.setApplicationName(QStringLiteral("HVAC"));
+    app.setApplicationName(myname);
     app.setApplicationVersion(QStringLiteral("0.1.0"));
     app.setOrganizationDomain(QStringLiteral("automotivelinux.org"));
     app.setOrganizationName(QStringLiteral("AutomotiveGradeLinux"));
@@ -67,18 +60,17 @@ int main(int argc, char *argv[])
 
     QCommandLineParser parser;
     parser.addPositionalArgument("port", app.translate("main", "port for binding"));
-//    parser.addPositionalArgument("secret", app.translate("main", "secret for binding"));
+    parser.addPositionalArgument("secret", app.translate("main", "secret for binding"));
     parser.addHelpOption();
     parser.addVersionOption();
     parser.process(app);
     QStringList positionalArguments = parser.positionalArguments();
 
-
     QQmlApplicationEngine engine;
-    int port = 0;
-    if (!positionalArguments.isEmpty()) {
-        port = positionalArguments.takeFirst().toInt();
+    if (positionalArguments.length() != 2) {
+        exit(EXIT_FAILURE);
     }
+    int port = positionalArguments.takeFirst().toInt();
     QString secret = positionalArguments.takeFirst();
     QUrl bindingAddress;
     bindingAddress.setScheme(QStringLiteral("http"));
@@ -99,6 +91,40 @@ int main(int argc, char *argv[])
     context->setContextProperty(QStringLiteral("bindingAddress"), bindingAddress);
     context->setContextProperty(QStringLiteral("bindingAddressWS"), bindingAddressWS);
 
+    std::string token = secret.toStdString();
+    LibHomeScreen* hs = new LibHomeScreen();
+    QLibWindowmanager* qwm = new QLibWindowmanager();
+
+    // WindowManager
+    if(qwm->init(port,secret) != 0) {
+        exit(EXIT_FAILURE);
+    }
+    // Request a surface as described in layers.json windowmanager’s file
+    if(qwm->requestSurface(myname) != 0) {
+        exit(EXIT_FAILURE);
+    }
+    // Create an event callback against an event type. Here a lambda is called when SyncDraw event occurs
+    qwm->set_event_handler(QLibWindowmanager::Event_SyncDraw, [qwm, myname](json_object *object) {
+	  fprintf(stderr, "Surface got syncDraw!\n");
+	  qwm->endDraw(myname);
+      });
+
+    // HomeScreen
+    hs->init(port, token.c_str());
+    // Set the event handler for Event_TapShortcut which will activate the surface for windowmanager
+    hs->set_event_handler(LibHomeScreen::Event_TapShortcut, [qwm, myname](json_object *object){
+        json_object *appnameJ = nullptr;
+        if(json_object_object_get_ex(object, "application_name", &appnameJ))
+        {
+            const char *appname = json_object_get_string(appnameJ);
+            if(myname == appname)
+            {
+                qDebug("Surface %s got tapShortcut\n", appname);
+                qwm->activateSurface(myname);
+            }
+        }
+    });
+
     QFile version("/proc/version");
     if (version.open(QFile::ReadOnly)) {
         QStringList data = QString::fromLocal8Bit(version.readAll()).split(QLatin1Char(' '));
@@ -110,6 +136,9 @@ int main(int argc, char *argv[])
     DBus dbus;
     engine.rootContext()->setContextProperty("dbus", &dbus);
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));
+    QObject *root = engine.rootObjects().first();
+    QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
+    QObject::connect(window, SIGNAL(frameSwapped()), qwm, SLOT(slotActivateSurface()));
 
     return app.exec();
 }
