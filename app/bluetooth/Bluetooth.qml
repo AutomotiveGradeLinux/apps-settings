@@ -144,8 +144,8 @@ SettingPage {
     onCheckedChanged: {
         console.log("Bluetooth set to", checked)
         if (checked == true) {
-            initBTlist()
             pairedDeviceCount=0
+            initBTlist()
             btOn=true
             request(btAPIpath + 'power?value=1', function (o) {
                 // log the json response
