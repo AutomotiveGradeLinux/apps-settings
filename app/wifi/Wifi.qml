@@ -399,14 +399,6 @@ SettingPage {
                     }
                 }
             }
-
-            Keyboard {
-                id: keyboard
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.preferredHeight: 1
-                target: activeFocusControl
-            }
         }
     }
 
