@@ -6,6 +6,11 @@ SOURCES = main.cpp
 CONFIG += link_pkgconfig
 PKGCONFIG += libhomescreen qlibwindowmanager
 
+static {
+    QTPLUGIN += qtvirtualkeyboardplugin
+    QT += svg
+}
+
 RESOURCES += \ 
     settings.qrc \
     images/images.qrc \
