@@ -17,7 +17,6 @@
 import QtQuick 2.6
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.0
-import QtQuick.VirtualKeyboard 2.1
 
 import 'datetime'
 import 'bluetooth'
@@ -31,15 +30,6 @@ ApplicationWindow {
     onVisibleChanged: {
         if (!visible)
             stack.pop(settings)
-    }
-
-    InputPanel {
-            id: inputPanel
-            z: 1
-            visible: Qt.inputMethod.visible
-            y: Qt.inputMethod.visible ? parent.height - inputPanel.height : parent.height
-            anchors.left: parent.left
-            anchors.right: parent.right
     }
 
     StackView {

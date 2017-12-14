@@ -50,7 +50,6 @@ int main(int argc, char *argv[])
 {
     QString myname = QString("Settings");
 
-    qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
     QGuiApplication app(argc, argv);
     app.setApplicationName(myname);
     app.setApplicationVersion(QStringLiteral("0.1.0"));
