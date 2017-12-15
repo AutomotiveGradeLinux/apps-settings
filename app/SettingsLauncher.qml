@@ -47,7 +47,7 @@ Page {
                 Label {
                     Layout.fillWidth: true
                     text: model.title.toUpperCase()
-                    color: '#66FF99'
+                    color: '#00ADDC'
                 }
                 Switch {
                     id: checkedSwitch
