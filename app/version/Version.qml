@@ -55,7 +55,7 @@ SettingPage {
                 font.pixelSize: 48
             }
             Label {
-                text: '5.0.0rc2 (Electric Eel)'
+                text: ucb
                 font.pixelSize: 48
                 Layout.fillWidth: true
             }

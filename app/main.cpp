@@ -133,6 +133,17 @@ int main(int argc, char *argv[])
     } else {
         qWarning() << version.errorString();
     }
+
+    QFile aglversion("/etc/os-release");
+    if (aglversion.open(QFile::ReadOnly)) {
+        QStringList data = QString::fromLocal8Bit(aglversion.readAll()).split(QLatin1Char('\n'));
+        QStringList data2 = data.at(2).split(QLatin1Char('"'));
+        engine.rootContext()->setContextProperty("ucb", data2.at(1));
+        aglversion.close();
+    } else {
+        qWarning() << aglversion.errorString();
+    }
+
     DBus dbus;
     engine.rootContext()->setContextProperty("dbus", &dbus);
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));
