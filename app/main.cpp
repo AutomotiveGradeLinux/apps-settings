@@ -27,6 +27,7 @@
 #include <QtQuickControls2/QQuickStyle>
 #include <QQuickWindow>
 #include <libhomescreen.hpp>
+#include <bluetooth.h>
 #include <qlibwindowmanager.h>
 
 class DBus : public QObject
@@ -72,14 +73,8 @@ int main(int argc, char *argv[])
     }
     int port = positionalArguments.takeFirst().toInt();
     QString secret = positionalArguments.takeFirst();
-    QUrl bindingAddress;
-    bindingAddress.setScheme(QStringLiteral("http"));
-    bindingAddress.setHost(QStringLiteral("localhost"));
-    bindingAddress.setPort(port);
-    bindingAddress.setPath(QStringLiteral("/api"));
     QUrlQuery query;
     query.addQueryItem(QStringLiteral("token"), secret);
-    //bindingAddress.setQuery(query);
 
     QUrl bindingAddressWS;
     bindingAddressWS.setScheme(QStringLiteral("ws"));
@@ -88,7 +83,6 @@ int main(int argc, char *argv[])
     bindingAddressWS.setPath(QStringLiteral("/api"));
     bindingAddressWS.setQuery(query);
     QQmlContext *context = engine.rootContext();
-    context->setContextProperty(QStringLiteral("bindingAddress"), bindingAddress);
     context->setContextProperty(QStringLiteral("bindingAddressWS"), bindingAddressWS);
 
     std::string token = secret.toStdString();
@@ -146,6 +140,7 @@ int main(int argc, char *argv[])
 
     DBus dbus;
     engine.rootContext()->setContextProperty("dbus", &dbus);
+    engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddressWS));
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));
     QObject *root = engine.rootObjects().first();
     QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
