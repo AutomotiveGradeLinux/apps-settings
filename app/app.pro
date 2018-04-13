@@ -1,10 +1,10 @@
 TARGET = settings
-QT = quickcontrols2 dbus
+QT = quickcontrols2 websockets dbus
 
 SOURCES = main.cpp
 
 CONFIG += link_pkgconfig
-PKGCONFIG += libhomescreen qlibwindowmanager
+PKGCONFIG += libhomescreen qlibwindowmanager qtappfw
 
 RESOURCES += \ 
     settings.qrc \
