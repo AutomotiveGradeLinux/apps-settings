@@ -30,11 +30,7 @@ SettingPage {
     readonly property bool isWifi: true
     property bool isInitializing: true
 
-    property string wifiAPIpath: bindingAddress + '/wifi-manager/'
-    //http://localhost:12345/api
-
     property string address_str: bindingAddressWS
-
     property string token_str: ""
     property string api_str: "wifi-manager"
     property string verb_str: ""
