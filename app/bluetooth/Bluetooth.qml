@@ -381,15 +381,12 @@ SettingPage {
                                     })
                         pairedDeviceCount = pairedDeviceCount + 1
                         btDeviceList.remove(i, 1)
-                        btDeviceList.layoutChanged()
                     }
                     else{
                         text=deviceConnectionAttribute(data)
                         btDeviceList.set(i, {
                                             textToShow: " " + text
                                         })
-
-                        btDeviceList.layoutChanged()
 
                         btDeviceList.get(i).deviceConnect = data.Connected
                         console.log(data.Connected)
@@ -403,8 +400,6 @@ SettingPage {
 
                     text=deviceConnectionAttribute(data)
                     pairedDeviceList.set(i, { textToShow: " " + text })
-
-                    pairedDeviceList.layoutChanged()
 
                     pairedDeviceList.get(i).deviceConnect = data.Connected
                }
