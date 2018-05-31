@@ -76,6 +76,7 @@ SettingPage {
             for (var i = 0; i < data.list.length; i++) {
                 var value = data.list[i]
                 if (value.Paired==="True") {
+                    if(findPairDevice(value.Address) == -1) {
                       pairedDeviceList.append({
                                       deviceAddress: value.Address,
                                       deviceName: value.Name,
@@ -86,8 +87,10 @@ SettingPage {
                                       textToShow: ""
                                   })
                       pairedDeviceCount = pairedDeviceCount + 1
+                    }
                   }
                 else
+                  if (findDevice(value.Address) == -1) {
                       btDeviceList.append({
                                        deviceAddress: value.Address,
                                        deviceName: value.Name,
@@ -97,6 +100,7 @@ SettingPage {
                                        connectHFP: value.HFPConnected,
                                        textToShow: ""
                                   })
+                  }
             }
         }
 
