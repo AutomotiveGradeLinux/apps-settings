@@ -28,6 +28,7 @@
 #include <QQuickWindow>
 #include <libhomescreen.hpp>
 #include <bluetooth.h>
+#include <network.h>
 #include <qlibwindowmanager.h>
 
 class DBus : public QObject
@@ -84,6 +85,7 @@ int main(int argc, char *argv[])
     bindingAddressWS.setQuery(query);
     QQmlContext *context = engine.rootContext();
     context->setContextProperty(QStringLiteral("bindingAddressWS"), bindingAddressWS);
+    context->setContextProperty("network", new Network(bindingAddressWS, context));
 
     std::string token = secret.toStdString();
     LibHomeScreen* hs = new LibHomeScreen();

@@ -49,8 +49,6 @@ ApplicationWindow {
                     if (!app.isSetting) continue
                     settingsModel.append({'icon': app.icon, 'title': app.title, 'checkable': app.checkable, 'app': app})
                     app.visible = false
-
-                    if (app.isWifi) app.activateWifi()
                 }
             }
 
