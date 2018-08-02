@@ -26,11 +26,20 @@ import 'version'
 
 ApplicationWindow {
     id: root
+    width: container.width * container.scale
+    height: container.height * container.scale
 
     onVisibleChanged: {
         if (!visible)
             stack.pop(settings)
     }
+
+    Item {
+        id: container
+        anchors.centerIn: parent
+        width: 1080
+        height: 1487
+        scale: screenInfo.scale_factor()
 
     StackView {
         id: stack
@@ -65,4 +74,5 @@ ApplicationWindow {
 
         Version {}
     }
+}
 }
