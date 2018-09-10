@@ -27,8 +27,6 @@
 #include <QtQuickControls2/QQuickStyle>
 #include <QQuickWindow>
 #include <libhomescreen.hpp>
-#include <bluetooth.h>
-#include <network.h>
 #include <qlibwindowmanager.h>
 
 class DBus : public QObject
@@ -85,7 +83,6 @@ int main(int argc, char *argv[])
     bindingAddressWS.setQuery(query);
     QQmlContext *context = engine.rootContext();
     context->setContextProperty(QStringLiteral("bindingAddressWS"), bindingAddressWS);
-    context->setContextProperty("network", new Network(bindingAddressWS, context));
 
     std::string token = secret.toStdString();
     LibHomeScreen* hs = new LibHomeScreen();
@@ -143,7 +140,6 @@ int main(int argc, char *argv[])
 
     DBus dbus;
     engine.rootContext()->setContextProperty("dbus", &dbus);
-    engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddressWS));
     engine.rootContext()->setContextProperty(QStringLiteral("screenInfo"), &screenInfo);
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));
     QObject *root = engine.rootObjects().first();
