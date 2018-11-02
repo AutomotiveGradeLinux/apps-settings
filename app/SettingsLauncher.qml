@@ -24,6 +24,7 @@ Page {
     property alias model: view.model
     signal launch(var app)
     signal toggled(var app, bool on)
+
     ListView {
         id: view
         anchors.fill: parent
@@ -33,7 +34,7 @@ Page {
         delegate: MouseArea {
             id: delegate
             width: ListView.view.width
-            height: width / 6
+            height: width / 15
             RowLayout {
                 anchors.fill: parent
                 Item {
