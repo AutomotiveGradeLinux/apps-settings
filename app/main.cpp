@@ -50,10 +50,10 @@ private:
 
 int main(int argc, char *argv[])
 {
-    QString myname = QString("Settings");
+    QString graphic_role = QString("settings"); // defined in layers.json in window manager
 
     QGuiApplication app(argc, argv);
-    app.setApplicationName(myname);
+    app.setApplicationName(graphic_role);
     app.setApplicationVersion(QStringLiteral("0.1.0"));
     app.setOrganizationDomain(QStringLiteral("automotivelinux.org"));
     app.setOrganizationName(QStringLiteral("AutomotiveGradeLinux"));
@@ -97,21 +97,21 @@ int main(int argc, char *argv[])
     }
     AGLScreenInfo screenInfo(qwm->get_scale_factor());
     // Request a surface as described in layers.json windowmanager’s file
-    if(qwm->requestSurface(myname) != 0) {
+    if(qwm->requestSurface(graphic_role) != 0) {
         exit(EXIT_FAILURE);
     }
     // Create an event callback against an event type. Here a lambda is called when SyncDraw event occurs
-    qwm->set_event_handler(QLibWindowmanager::Event_SyncDraw, [qwm, myname](json_object *object) {
+    qwm->set_event_handler(QLibWindowmanager::Event_SyncDraw, [qwm, &graphic_role](json_object *object) {
 	  fprintf(stderr, "Surface got syncDraw!\n");
-	  qwm->endDraw(myname);
+	  qwm->endDraw(graphic_role);
       });
 
     // HomeScreen
     hs->init(port, token.c_str());
     // Set the event handler for Event_TapShortcut which will activate the surface for windowmanager
-    hs->set_event_handler(LibHomeScreen::Event_TapShortcut, [qwm, myname](json_object *object){
-        qDebug("Surface %s got tapShortcut\n", myname.toStdString().c_str());
-        qwm->activateSurface(myname);
+    hs->set_event_handler(LibHomeScreen::Event_TapShortcut, [qwm, &graphic_role](json_object *object){
+        qDebug("Surface %s got tapShortcut\n", graphic_role.toStdString().c_str());
+        qwm->activateWindow(graphic_role);
     });
 
     QFile version("/proc/version");
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));
     QObject *root = engine.rootObjects().first();
     QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
-    QObject::connect(window, SIGNAL(frameSwapped()), qwm, SLOT(slotActivateSurface()));
+    QObject::connect(window, SIGNAL(frameSwapped()), qwm, SLOT(slotActivateWindow()));
 
     return app.exec();
 }
