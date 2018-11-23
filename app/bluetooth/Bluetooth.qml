@@ -350,6 +350,7 @@ SettingPage {
                                         deviceAddress: btDeviceList.get(i).deviceAddress,
                                         deviceName: btDeviceList.get(i).deviceName,
                                         devicePairable: btDeviceList.get(i).devicePairable,
+                                        deviceConnect: btDeviceList.get(i).deviceConnect,
                                     })
                         pairedDeviceCount = pairedDeviceCount + 1
                         btDeviceList.remove(i, 1)
