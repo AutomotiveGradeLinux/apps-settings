@@ -283,6 +283,7 @@ SettingPage {
           anchors.bottom: pairedlabel.bottom
           anchors.bottomMargin: (-120*pairedDeviceCount)
           model: pairedDeviceList
+	  visible: bluetooth.power
           delegate: blueToothDevice
           clip: true
       }
