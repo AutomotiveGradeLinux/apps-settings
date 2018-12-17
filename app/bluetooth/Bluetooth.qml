@@ -139,16 +139,16 @@ SettingPage {
       anchors.horizontalCenter: parent.horizontalCenter
       anchors.bottom: parent.bottom
       anchors.margins: 80
-      width: buttonScan.width + 10
-      height: buttonScan.height + 10
+      width: 110
       color: "#222"
       border.color: "white"
 
                 Button {
                     id: buttonScan
                     anchors.centerIn: parent
-                    width: 100
+                    anchors.margins: 10
                     text: bluetooth.discoverable ? "STOP" :"SEARCH"
+                    visible: bluetooth.power
 
                     MouseArea {
                         //id: mouseArea
@@ -283,7 +283,7 @@ SettingPage {
           anchors.bottom: pairedlabel.bottom
           anchors.bottomMargin: (-120*pairedDeviceCount)
           model: pairedDeviceList
-	  visible: bluetooth.power
+          visible: bluetooth.power
           delegate: blueToothDevice
           clip: true
       }
@@ -318,6 +318,7 @@ SettingPage {
           anchors.bottom: parent.bottom
           anchors.bottomMargin: 150
           model: btDeviceList
+          visible: bluetooth.power
           delegate: blueToothDevice
           clip: true
       }
