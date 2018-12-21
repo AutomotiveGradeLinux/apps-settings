@@ -19,8 +19,6 @@
 #include <QtCore/QCommandLineParser>
 #include <QtCore/QUrlQuery>
 #include <QtCore/QFile>
-#include <QtDBus/QDBusInterface>
-#include <QtDBus/QDBusReply>
 #include <QtGui/QGuiApplication>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtQml/QQmlContext>
@@ -30,23 +28,6 @@
 #include <bluetooth.h>
 #include <network.h>
 #include <qlibwindowmanager.h>
-
-class DBus : public QObject
-{
-    Q_OBJECT
-public:
-    DBus(QObject *parent = nullptr)
-        : QObject(parent)
-        , interface("org.agl.homescreen", "/StatusBar", "org.agl.statusbar", QDBusConnection::sessionBus())
-    {}
-
-    Q_INVOKABLE void setStatusIcon(int index, const QString &url) {
-        interface.call("setStatusIcon", index, url);
-    }
-
-private:
-    QDBusInterface interface;
-};
 
 int main(int argc, char *argv[])
 {
@@ -133,8 +114,6 @@ int main(int argc, char *argv[])
         qWarning() << aglversion.errorString();
     }
 
-    DBus dbus;
-    engine.rootContext()->setContextProperty("dbus", &dbus);
     engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddressWS));
     engine.rootContext()->setContextProperty(QStringLiteral("screenInfo"), &screenInfo);
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));
@@ -144,5 +123,3 @@ int main(int argc, char *argv[])
 
     return app.exec();
 }
-
-#include "main.moc"

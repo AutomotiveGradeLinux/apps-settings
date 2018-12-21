@@ -1,5 +1,5 @@
 TARGET = settings
-QT = quickcontrols2 websockets dbus
+QT = quickcontrols2 websockets
 
 SOURCES = main.cpp
 
@@ -12,7 +12,6 @@ RESOURCES += \
     datetime/datetime.qrc \
     wifi/wifi.qrc \
     bluetooth/bluetooth.qrc \
-    example/example.qrc \
     version/version.qrc
 
 
