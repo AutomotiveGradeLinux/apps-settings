@@ -21,7 +21,6 @@ import QtQuick.Controls 2.0
 import 'datetime'
 import 'bluetooth'
 import 'wifi'
-import 'example'
 import 'version'
 
 ApplicationWindow {
@@ -69,8 +68,6 @@ ApplicationWindow {
         Bluetooth {}
 
         Wifi {}
-
-//        Example {}
 
         Version {}
     }
