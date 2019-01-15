@@ -101,9 +101,7 @@ SettingPage {
             }
         }
 
-        onPowerChanged: {
-            root.checked = state
-        }
+        Component.onCompleted: root.checked = bluetooth.power
     }
 
     Text {
