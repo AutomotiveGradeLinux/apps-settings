@@ -101,7 +101,7 @@ SettingPage {
             }
         }
 
-        Component.onCompleted: root.checked = bluetooth.power
+        onPowerChanged: if (!root.checked) root.checked = state
     }
 
     Text {
