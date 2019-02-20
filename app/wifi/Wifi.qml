@@ -51,7 +51,7 @@ SettingPage {
                         svg = "3Bars"
                     else
                         svg = "Full"
-                    if (security === "Open") {
+                    if (security === "none") {
                         return 'images/HMI_Settings_Wifi_%1.svg'.arg(svg)
                     } else {
                         return 'images/HMI_Settings_Wifi_Locked_%1.svg'.arg(svg)
