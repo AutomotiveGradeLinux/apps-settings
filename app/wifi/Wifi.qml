@@ -61,6 +61,7 @@ SettingPage {
             Column {
                 anchors.left: icon.right
                 anchors.leftMargin: 5
+                id: networkName
                 Label {
                     id: networkNameText
                     text: ssid
@@ -77,7 +78,19 @@ SettingPage {
                     color: "white"
                 }
             }
-
+            Column {
+                anchors.left: networkName.right
+                anchors.leftMargin: 50
+                Button {
+                    visible: sstate === "ready"
+                             || sstate === "online"
+                    text: 'Forget Network'
+                    onClicked: {
+                        console.log("Removing network ", ssid, " (", service, ")")
+                        network.remove(service)
+                    }
+                }
+            }
             onClicked: {
                 if ((sstate === "ready") || sstate === "online") {
                     console.log("Disconnecting from ", ssid, " (", service, ")")
