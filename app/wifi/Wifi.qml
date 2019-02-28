@@ -99,6 +99,7 @@ SettingPage {
                 } else {
                     console.log("Connecting to ", ssid, " (", service, ")")
                     networkNameText.font.italic = 1
+                    password.text = ''
                     network.connect(service)
                 }
             }
@@ -130,8 +131,6 @@ SettingPage {
         onVisibleChanged: {
             if (visible) {
                 password.forceActiveFocus()
-            } else {
-                password.text = ''
             }
         }
 
@@ -163,7 +162,10 @@ SettingPage {
                     }
                     Button {
                         text: 'Cancel'
-                        onClicked: dialog.visible = false
+                        onClicked: {
+                                dialog.visible = false
+                                password.text = ''
+                        }
                     }
                 }
             }
@@ -183,6 +185,11 @@ SettingPage {
         onInputRequest: {
             password.reqid = id
             dialog.visible = true
+        }
+
+        onInvalidPassphrase: {
+            console.log("Invalid passphrase for (", service, ")")
+            network.connect(service)
         }
     }
 }
