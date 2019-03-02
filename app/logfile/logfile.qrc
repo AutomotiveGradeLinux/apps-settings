@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/logfile">
+        <file>Bar.qml</file>
+        <file>LogFile.qml</file>
+        <file>LogSave.qml</file>
+        <file>CANLog.qml</file>
+        <file>LogPlay.qml</file>
+        <file>VideoLog.qml</file>
+        <file>AudioLog.qml</file>
+        <file>keyboard/Numbers.qml</file>
+        <file>keyboard/Keyboard.qml</file>
+        <file>keyboard/Key.qml</file>
+        <file>keyboard/AbstractKeyboard.qml</file>
+        <file>images/HMI_Settings_LogFile.svg</file>
+        <file>images/Keyboard_Arrow.svg</file>
+        <file>images/Keyboard_Back.svg</file>
+        <file>images/HMI_Settings_Button_Cancel.svg</file>
+        <file>images/HMI_Settings_Button_Ok.svg</file>
+        <file>TouchLog.qml</file>
+        <file>TouchLogPlay.qml</file>
+        <file>images/camerainfo_bg.svg</file>
+    </qresource>
+</RCC>

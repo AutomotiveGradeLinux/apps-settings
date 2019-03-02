@@ -29,6 +29,10 @@
 #include <network.h>
 #include <qlibwindowmanager.h>
 
+#include "logfile/logsave.h"
+#include "logfile/logplay.h"
+#include "logfile/touchlogplay.h"
+
 int main(int argc, char *argv[])
 {
     QString graphic_role = QString("settings"); // defined in layers.json in window manager
@@ -48,6 +52,10 @@ int main(int argc, char *argv[])
     parser.addVersionOption();
     parser.process(app);
     QStringList positionalArguments = parser.positionalArguments();
+
+    qmlRegisterType<LogSaveImpl>("LogSaveImpl", 1, 0, "LogSaveImpl");
+    qmlRegisterType<LogPlayImpl>("LogPlayImpl", 1, 0, "LogPlayImpl");
+    qmlRegisterType<TouchLogPlayImpl>("TouchLogPlayImpl", 1, 0, "TouchLogPlayImpl");
 
     QQmlApplicationEngine engine;
     if (positionalArguments.length() != 2) {

@@ -22,6 +22,7 @@ import 'datetime'
 import 'bluetooth'
 import 'wifi'
 import 'version'
+import 'logfile'
 
 ApplicationWindow {
     id: root
@@ -68,6 +69,8 @@ ApplicationWindow {
         Bluetooth {}
 
         Wifi {}
+
+        LogFile {}
 
         Version {}
     }
