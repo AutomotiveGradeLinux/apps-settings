@@ -144,7 +144,7 @@ bool LogSaveImpl::saveStart(bool can, bool touch, bool video, bool audio)
             fd = open(dumpUtilsArg["-L"].toStdString().c_str(), O_CREAT | O_WRONLY, 0666);
             dup2(fd, 1);
             close(fd);     /* fd は以後不要なので close() */
-            execl(DumpUtilsExec.c_str(), basename(DumpUtilsExec.c_str()), "vcan0", "-L", (char *)NULL);
+            execl(DumpUtilsExec.c_str(), basename(DumpUtilsExec.c_str()), "slcan0", "-L", (char *)NULL);
             break;
         default:
             break;

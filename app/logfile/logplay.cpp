@@ -242,7 +242,7 @@ void LogPlayImpl::setCANProperty(int index, QString port, QString stime, QString
 {
     if(index > 0 && index < datas.size())
     {
-        playUtilsArg["-p"] = "vcan0="+port;
+        playUtilsArg["-p"] = "slcan0="+port;
         playUtilsArg["-I"] = datas[index][pathRole].toString();
     }
 }
