@@ -163,8 +163,9 @@ SettingPage {
                     Button {
                         text: 'Cancel'
                         onClicked: {
-                                dialog.visible = false
-                                password.text = ''
+                            dialog.visible = false
+                            password.text = ''
+                            network.input(password.reqid, '')
                         }
                     }
                 }
@@ -188,8 +189,10 @@ SettingPage {
         }
 
         onInvalidPassphrase: {
-            console.log("Invalid passphrase for (", service, ")")
-            network.connect(service)
+            if (password.text != '') {
+                console.log("Invalid passphrase for (", service, ")")
+                network.connect(service)
+            }
         }
     }
 }
