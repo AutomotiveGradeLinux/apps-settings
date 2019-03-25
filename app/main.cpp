@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
         qWarning() << aglversion.errorString();
     }
 
-    engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddressWS));
+    engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddressWS, context));
     engine.rootContext()->setContextProperty(QStringLiteral("screenInfo"), &screenInfo);
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));
     QObject *root = engine.rootObjects().first();
