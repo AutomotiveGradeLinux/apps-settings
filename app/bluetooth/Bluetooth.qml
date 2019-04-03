@@ -33,7 +33,14 @@ SettingPage {
             bluetooth.send_confirmation(data.pincode)
         }
 
-        onPowerChanged: if (!root.checked) root.checked = state
+        onPowerChanged: {
+            if (state) {
+                bluetooth.start_discovery()
+                bluetooth.discoverable = true;
+            }
+            root.checked = state
+        }
+
     }
 
     Text {
@@ -46,12 +53,7 @@ SettingPage {
 
     onCheckedChanged: {
         console.log("Bluetooth set to", checked)
-
-        bluetooth.power = checked;
-        bluetooth.discoverable = checked;
-
-        if (checked == true)
-            bluetooth.start_discovery()
+        bluetooth.power = checked
     }
 
     Rectangle {
