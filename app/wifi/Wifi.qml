@@ -87,6 +87,7 @@ SettingPage {
                     text: 'Forget Network'
                     onClicked: {
                         console.log("Removing network ", ssid, " (", service, ")")
+                        networkNameText.font.italic = 0
                         network.remove(service)
                     }
                 }
@@ -131,6 +132,9 @@ SettingPage {
         onVisibleChanged: {
             if (visible) {
                 password.forceActiveFocus()
+                root.checkable = false
+            } else {
+                root.checkable = true
             }
         }
 
