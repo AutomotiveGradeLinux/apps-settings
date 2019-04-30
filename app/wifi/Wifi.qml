@@ -26,11 +26,11 @@ SettingPage {
     icon: '/wifi/images/HMI_Settings_WifiIcon.svg'
     title: 'Wifi'
     checkable: true
-    checked: network.wifiEnabled
+    checked: WifiAdapter.wifiEnabled
     readonly property bool isWifi: true
 
     onCheckedChanged: {
-        network.power(checked)
+        network.power(checked,"wifi")
     }
 
     Component {
