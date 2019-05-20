@@ -24,7 +24,7 @@
 #include <QtQml/QQmlContext>
 #include <QtQuickControls2/QQuickStyle>
 #include <QQuickWindow>
-#include <libhomescreen.hpp>
+#include <qlibhomescreen.h>
 #include <bluetooth.h>
 #include <network.h>
 #include <qlibwindowmanager.h>
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     context->setContextProperty("network", new Network(bindingAddressWS, context));
 
     std::string token = secret.toStdString();
-    LibHomeScreen* hs = new LibHomeScreen();
+    QLibHomeScreen* qhs = new QLibHomeScreen();
     QLibWindowmanager* qwm = new QLibWindowmanager();
 
     // WindowManager
@@ -88,9 +88,9 @@ int main(int argc, char *argv[])
       });
 
     // HomeScreen
-    hs->init(port, token.c_str());
+    qhs->init(port, token.c_str());
     // Set the event handler for Event_ShowWindow which will activate the surface for windowmanager
-    hs->set_event_handler(LibHomeScreen::Event_ShowWindow, [qwm, &graphic_role](json_object *object){
+    qhs->set_event_handler(QLibHomeScreen::Event_ShowWindow, [qwm, &graphic_role](json_object *object){
         qDebug("Surface %s got showWindow\n", graphic_role.toStdString().c_str());
         qwm->activateWindow(graphic_role);
     });
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));
     QObject *root = engine.rootObjects().first();
     QQuickWindow *window = qobject_cast<QQuickWindow *>(root);
-    QObject::connect(window, SIGNAL(frameSwapped()), qwm, SLOT(slotActivateWindow()));
+    qhs->setQuickWindow(window);
 
     return app.exec();
 }
