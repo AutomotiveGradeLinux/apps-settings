@@ -33,7 +33,7 @@ Page {
         delegate: MouseArea {
             id: delegate
             width: ListView.view.width
-            height: width / 6
+            height: width / 15
             RowLayout {
                 anchors.fill: parent
                 Item {
