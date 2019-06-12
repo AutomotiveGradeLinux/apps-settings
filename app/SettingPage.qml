@@ -41,7 +41,7 @@ Page {
         anchors.rightMargin: 100
         anchors.bottom: parent.top
         anchors.bottomMargin: 10
-        spacing: 50
+        spacing: 20
 
         Switch {
             id: checkedSwitch
