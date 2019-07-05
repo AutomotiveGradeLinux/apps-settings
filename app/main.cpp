@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
     app.setApplicationName(graphic_role);
-    app.setApplicationVersion(QStringLiteral("0.1.0"));
+    app.setApplicationVersion(QStringLiteral("0.1.1"));
     app.setOrganizationDomain(QStringLiteral("automotivelinux.org"));
     app.setOrganizationName(QStringLiteral("AutomotiveGradeLinux"));
 

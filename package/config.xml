@@ -3,7 +3,7 @@
   <name>Settings</name>
   <icon src="icon.svg"/>
   <content src="bin/settings" type="application/vnd.agl.native"/>
-  <description>This is the settings application for date &amp; time, wifi and bluetooth</description>
+  <description>This is the settings application for date &amp; time, wifi, wired and bluetooth</description>
   <author>Tasuku Suzuki &lt;tasuku.suzuki@qt.io&gt;</author>
   <license>APL 2.0</license>
   <feature name="urn:AGL:widget:required-api">

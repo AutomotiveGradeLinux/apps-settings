@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/wired">
+        <file>Wired.qml</file>
+        <file>images/HMI_Settings_WiredIcon.svg</file>
+    </qresource>
+</RCC>
