@@ -36,7 +36,7 @@ SettingPage {
         Label { text: 'Time'}
         TimeEdit {}
         RowLayout {
-            anchors.right: parent.right
+            Layout.alignment: Qt.AlignRight
             Button {
                 text: 'OK'
                 highlighted: true
