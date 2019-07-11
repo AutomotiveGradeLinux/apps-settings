@@ -65,7 +65,7 @@ GridLayout {
         Component.onCompleted: regenerateModel()
         function regenerateModel() {
             var eom = 0
-            var y = yearControl.model[yearControl.currentIndex]
+            var y = yearControl.currentIndex === -1 ? yearControl.model[0] : yearControl.model[yearControl.currentIndex]
             var m = monthControl.currentIndex + 1
             switch (m) {
             case 2:
@@ -103,13 +103,13 @@ GridLayout {
 
     Tumbler {
         id: yearControl
-        Component.onCompleted: {
-            var arr = new Array
-            for (var i = 2010; i < 2050; i++) {
+        readonly property var years: (function() {
+            var arr = []
+            for (var i = 2010; i < 2050; i++)
                 arr.push(i)
-            }
-            yearControl.model = arr
-        }
+            return arr
+        })()
+        model: years
         onCurrentIndexChanged: dayControl.regenerateModel()
         EditSeparator { anchors.fill: parent }
     }
