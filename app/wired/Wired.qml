@@ -60,7 +60,6 @@ SettingPage {
                 } else {
                     console.log("Connecting to ->", service)
                     networkNameText.font.italic = 1
-                    password.text = ''
                     network.connect(service)
                 }
             }
@@ -87,7 +86,7 @@ SettingPage {
     Connections {
         target: network
         onInputRequest: {
-                console.log("Only unatheunticated access implemented for (", service, ")")
+                console.log("Only unauthenticated access implemented for wired")
         }
 
     }
