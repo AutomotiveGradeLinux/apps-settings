@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import QtQuick 2.6
+import QtQuick 2.11
 import QtQuick.Layouts 1.1
-import QtQuick.Controls 2.0
+import QtQuick.Controls 2.4
 import AGL.Demo.Controls 1.0
 import ".."
 
@@ -40,7 +40,7 @@ SettingPage {
                     id: networkNameText
                     text: service
                     color: '#66FF99'
-                    font.pixelSize: 48
+                    font.pixelSize: 38
                     font.bold: sstate === "ready"
                                || sstate === "online"
                 }
@@ -50,6 +50,29 @@ SettingPage {
                     text: "connected, " + address
                     font.pixelSize: 18
                     color: "white"
+                }
+            }
+            Column {
+                anchors.left: networkName.right
+                anchors.leftMargin: 50
+                Button {
+                    visible: sstate === "ready"
+                             || sstate === "online"
+                    font.pixelSize: 18
+                    text: "CONFIGURE"
+                    onClicked: {
+                        customconf.open()
+                   }
+
+                   ConfigDialog {
+                       id: customconf
+                       parent: Overlay.overlay
+                       maxpwidth: 744
+                       maxpheight: 744
+                       xpos: (parent.width - maxpwidth)/2
+                       ypos: (parent.height - maxpheight)
+                       serviceName: service
+                   }
                 }
             }
             onClicked: {
@@ -88,6 +111,5 @@ SettingPage {
         onInputRequest: {
                 console.log("Only unauthenticated access implemented for wired")
         }
-
     }
 }
