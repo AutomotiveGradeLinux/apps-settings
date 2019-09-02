@@ -28,16 +28,24 @@ Dialog {
     property alias ypos: root.y
     property alias maxpwidth: root.width
     property alias maxpheight: root.height
-    property alias staticAddress: m_staticAddress.text
-    property alias staticNetmask: m_staticNetmask.text
-    property alias staticGateway: m_staticGateway.text
-    property alias dnslist: m_dnslist.text
+    property alias customAddress: m_customAddress.text
+    property alias customNetmask: m_customNetmask.text
+    property alias customGateway: m_customGateway.text
+    property alias customNSlist: m_customNSlist.text
+
+    property string activeAddress: undefined
+    property string activeNetmask: undefined
+    property string activeGateway: undefined
+    property string activeNSList: undefined
+
+    property bool activeStatic: undefined
+    property bool activeManualNS: undefined
 
     property bool isIPv4: true
-    property bool isStatic: false
-    property bool isManualDNS: false
+    property bool isStatic: activeStatic
+    property bool isManualDNS: activeManualNS
 
-    signal finished(string svc, string ipv, string ipa, string nm, string gw, string dns)
+    signal finished(string svc, var newaa, var newna)
 
     visible: false
     z: 1
@@ -68,10 +76,10 @@ Dialog {
         isIPv4 = true
         isStatic = false
         isManualDNS = false
-        staticAddress = ""
-        staticNetmask = ""
-        staticGateway = ""
-        dnslist = ""
+        m_customAddress.clear()
+        m_customNetmask.clear()
+        m_customGateway.clear()
+        m_customNSlist.clear()
     }
 
     onIsIPv4Changed: {
@@ -86,17 +94,36 @@ Dialog {
         dnsSwitch.checked = isManualDNS
     }
 
-    onAccepted: {
+    onAccepted: readInputValues()
+    function readInputValues() {
         if (isIPv4 === false) {
             console.log("IPv6 not supported by settings application")
             setDefaultValues()
         } else {
-            finished(serviceName,"IPv4", staticAddress, staticNetmask, staticGateway, dnslist)
+            var aa = [];
+            isStatic? aa.push("manual") : aa.push("dhcp");
+            aa.push(customAddress);
+            aa.push(customNetmask);
+            aa.push(customGateway);
+            var na = [];
+            isManualDNS? na.push("manual"): na.push("auto");
+            isManualDNS? na.push(customNSlist) : na.push("");
+            root.finished(serviceName, aa, na);
         }
     }
 
     onReset: {
         setDefaultValues()
+    }
+
+    onRejected: {
+        isIPv4 = true
+        isStatic = activeStatic
+        isManualDNS = activeManualNS
+        customAddress.clear()
+        customNetmask.clear()
+        customGateway.clear()
+        customNSlist.clear()
     }
 
     Item {
@@ -217,11 +244,12 @@ Dialog {
                         color: '#080C0F'
                         text: "address:"
                     }
-                    TextField {
-                        id: m_staticAddress
+                    TextArea {
+                        id: m_customAddress
                         font.pixelSize: 28
                         Layout.fillWidth: true
-                        placeholderText: "address"
+                        Layout.alignment: Qt.AlignLeft
+                        placeholderText: activeAddress
                     }
                 }
                 ColumnLayout {
@@ -232,11 +260,12 @@ Dialog {
                         color: '#080C0F'
                         text: "netmask:"
                     }
-                    TextField {
-                        id: m_staticNetmask
+                    TextArea {
+                        id: m_customNetmask
                         font.pixelSize: 28
                         Layout.fillWidth: true
-                        placeholderText: "netmask"
+                        Layout.alignment: Qt.AlignLeft
+                        placeholderText: activeNetmask
                     }
                 }
                 ColumnLayout {
@@ -247,11 +276,12 @@ Dialog {
                         color: '#080C0F'
                         text: "gateway:"
                     }
-                    TextField {
-                        id: m_staticGateway
+                    TextArea {
+                        id: m_customGateway
                         font.pixelSize: 28
                         Layout.fillWidth: true
-                        placeholderText: "gateway"
+                        Layout.alignment: Qt.AlignLeft
+                        placeholderText: activeGateway
                     }
                 }
             }
@@ -302,11 +332,12 @@ Dialog {
                         color: '#080C0F'
                         text: "DNS list:"
                     }
-                    TextField {
-                        id: m_dnslist
+                    TextArea {
+                        id: m_customNSlist
                         font.pixelSize: 28
                         Layout.fillWidth: true
-                        placeholderText: "List DNS semicolon separated"
+                        Layout.alignment: Qt.AlignLeft
+                        placeholderText: activeNSList
                     }
                 }
             }

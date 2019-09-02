@@ -61,6 +61,12 @@ SettingPage {
                     font.pixelSize: 18
                     text: "CONFIGURE"
                     onClicked: {
+                        customconf.activeStatic  = Qt.binding(function() { return (sroute[0] === "dhcp")? false : true })
+                        customconf.activeAddress = Qt.binding(function() { return sroute[1]? sroute[1] : "0.0.0.0" })
+                        customconf.activeNetmask = Qt.binding(function() { return sroute[2]? sroute[2] : "255.255.255.255" })
+                        customconf.activeGateway = Qt.binding(function() { return sroute[3]? sroute[3] : "0.0.0.0" })
+                        customconf.activeManualNS = Qt.binding(function() { return (nservers[0] === "auto")? false : true })
+                        customconf.activeNSList = Qt.binding(function() { return nservers[1]? nservers[1] : "0.0.0.0" })
                         customconf.open()
                    }
 
@@ -72,11 +78,31 @@ SettingPage {
                        xpos: (parent.width - maxpwidth)/2
                        ypos: (parent.height - maxpheight)
                        serviceName: service
+                       activeAddress: address
+                       activeNetmask: sroute[2]
+                       activeGateway: sroute[3]
+                       activeStatic: false
+                       activeManualNS: false
+                       activeNSList: nservers[1]
+
+                       onFinished: {
+                           if (!((sroute[0] === newaa[0]) &&
+                                 (sroute[1] === newaa[1]) &&
+                                 (sroute[2] === newaa[2]) &&
+                                 (sroute[3] === newaa[3]))) {
+                               network.configureAddress(svc, newaa);
+                           }
+
+                           if (!((nservers[0] === newna[0]) &&
+                                 (nservers[1] === newna[1]))) {
+                               network.configureNameServer(svc, newna);
+                           }
+                       }
                    }
                 }
             }
             onClicked: {
-                if ((sstate === "ready") || sstate === "online") {
+                if ((sstate === "ready") || (sstate === "online")) {
                     console.log("Disconnecting from ->", service)
                     networkNameText.font.italic = 1
                     network.disconnect(service)
