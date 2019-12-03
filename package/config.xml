@@ -11,6 +11,7 @@
     <param name="homescreen" value="ws" />
     <param name="network-manager" value="ws" />
     <param name="Bluetooth-Manager" value="ws" />
+    <param name="vshl-core" value="ws" />
   </feature>
   <feature name="urn:AGL:widget:required-permission">
     <param name="urn:AGL:permission::public:no-htdocs" value="required" />
