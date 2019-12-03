@@ -13,7 +13,7 @@ RESOURCES += \
     wifi/wifi.qrc \
     wired/wired.qrc \
     bluetooth/bluetooth.qrc \
-    version/version.qrc
-
+    version/version.qrc \
+    voice/voice.qrc
 
 include(app.pri)
