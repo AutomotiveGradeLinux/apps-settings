@@ -130,7 +130,7 @@ Dialog {
                 Label {
                     id: thiswuwlabel
                     font.pixelSize: 28
-                    color: '#66FF99'
+                    color: '#848286'
                     text: thisAgentWuW
                 }
             }
@@ -166,19 +166,19 @@ Dialog {
                     Label {
                         id: authsLabel
                         font.pixelSize: 28
-                        color: (thisAgentAuthState == "UNITIALIZED")? 'red' : '#66FF99'
+                        color: (thisAgentAuthState == "UNINITIALIZED")? '#00ADDC' : '#848286'
                         text: thisAgentAuthState
                     }
                     Label {
                         id: connslabel
                         font.pixelSize: 28
-                        color: (thisAgentConnState == "DISCONNECTED")? 'red' : '#0DF9FF'
+                        color: (thisAgentConnState == "DISCONNECTED")? '#00ADDC' : '#848286'
                         text: thisAgentConnState
                     }
                     Label {
                         id: dialogsLabel
                         font.pixelSize: 28
-                        color: (thisAgentDialogState == "MICROPHONEOFF")? 'red' : '#0DF9FF'
+                        color: (thisAgentDialogState == "MICROPHONEOFF")? '#00ADDC' : '#848286'
                         text: thisAgentDialogState
                     }
                 }
