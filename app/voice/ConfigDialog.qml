@@ -18,8 +18,8 @@
 import QtQuick 2.11
 import QtQuick.Controls 2.4
 import QtQuick.Layouts 1.3
+import QtQrCode.Component 1.0
 import AGL.Demo.Controls 1.0
-
 
 Dialog {
     id: root
@@ -30,6 +30,7 @@ Dialog {
 
     property string thisAgentName: undefined
     property string thisAgentId: undefined
+    property string thisAgentVendor: undefined
     property string thisAgentWuW: undefined
     property string thisAgentAuthState: undefined
     property string thisAgentConnState: undefined
@@ -44,7 +45,7 @@ Dialog {
     visible: false
     z: 1
     focus: true
-    modal: false
+    modal: true
     footer: DialogButtonBox {
         Button { text: "CLOSE"
                  DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
@@ -60,7 +61,8 @@ Dialog {
 
     background: Rectangle {
         border.color : '#00ADDC'
-        color: 'transparent'
+        color: 'black'
+        opacity: 0.5
     }
 
     onReset: refreshToken()
@@ -74,161 +76,189 @@ Dialog {
         anchors.fill: parent
         ColumnLayout {
             anchors.fill: parent
+            spacing: 0
+
             RowLayout {
-                Layout.fillHeight: true
+                Layout.fillHeight: false
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignLeft
-                spacing: 32
-                visible: true
-                Label {
-                    id: voiceLabel
-                    font.pixelSize: 28
-                    color: '#080C0F'
-                    text: "Voice Agent:"
-                    Layout.preferredWidth: 200
-                }
-                Label {
-                    id: idLabel
-                    font.pixelSize: 28
-                    color: '#66FF99'
-                    text: thisAgentId
-                }
-            }
-            RowLayout {
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignLeft
-                spacing: 32
-                visible: true
-                Label {
-                    id: namelabel
-                    font.pixelSize: 28
-                    color: '#080C0F'
-                    text: "Assistant Name:"
-                    Layout.preferredWidth: 200
-                }
-                Label {
-                    id: aNamelabel
-                    font.pixelSize: 28
-                    color: '#66FF99'
-                    text: thisAgentName
-                }
-            }
-            RowLayout {
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignLeft
-                spacing: 32
-                visible: true
-                Label {
-                    id: wuwlabel
-                    font.pixelSize: 28
-                    color: '#080C0F'
-                    text: "Wake Up Word:"
-                    Layout.preferredWidth: 200
-                }
-                Label {
-                    id: thiswuwlabel
-                    font.pixelSize: 28
-                    color: '#848286'
-                    text: thisAgentWuW
-                }
-            }
-            RowLayout {
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignHCenter
+                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 spacing: 16
-                visible: true
+
+                /* Labels */
                 ColumnLayout {
                     Layout.fillWidth: true
                     Label {
+                        id: nameLabel
+                        font.pixelSize: 28
+                        color: 'white'
+                        text: "Voice Agent:"
+                        Layout.preferredWidth: 200
+                    }
+                    Label {
+                        id: vendorLabel
+                        font.pixelSize: 28
+                        color: 'white'
+                        text: "Vendor:"
+                        Layout.preferredWidth: 200
+                    }
+                    Label {
+                        id: wuwLabel
+                        font.pixelSize: 28
+                        color: 'white'
+                        text: "Wake Up Word:"
+                        Layout.preferredWidth: 200
+                    }
+                    Label {
                         id: authLabel
                         font.pixelSize: 28
-                        color: '#080C0F'
+                        color: 'white'
                         text: "Authorization status:"
                     }
                     Label {
-                        id: connlabel
+                        id: connLabel
                         font.pixelSize: 28
-                        color: '#080C0F'
+                        color: 'white'
                         text: "Connection status:"
                     }
                     Label {
                         id: dialogLabel
                         font.pixelSize: 28
-                        color: '#080C0F'
+                        color: 'white'
                         text: "Dialog status:"
                     }
                 }
+
+                /* Values */
                 ColumnLayout {
                     Layout.fillWidth: true
                     Label {
-                        id: authsLabel
+                        id: nameValue
+                        font.pixelSize: 28
+                        color: '#66FF99'
+                        text: thisAgentName
+                    }
+                    Label {
+                        id: vendorValue
+                        font.pixelSize: 28
+                        color: '#66FF99'
+                        text: thisAgentVendor
+                    }
+                    Label {
+                        id: wuwValue
+                        font.pixelSize: 28
+                        color: '#66FF99'
+                        text: thisAgentWuW
+                    }
+                    Label {
+                        id: authValue
                         font.pixelSize: 28
                         color: (thisAgentAuthState == "UNINITIALIZED")? '#00ADDC' : '#848286'
                         text: thisAgentAuthState
                     }
                     Label {
-                        id: connslabel
+                        id: connValue
                         font.pixelSize: 28
                         color: (thisAgentConnState == "DISCONNECTED")? '#00ADDC' : '#848286'
                         text: thisAgentConnState
                     }
                     Label {
-                        id: dialogsLabel
+                        id: dialogValue
                         font.pixelSize: 28
                         color: (thisAgentDialogState == "MICROPHONEOFF")? '#00ADDC' : '#848286'
                         text: thisAgentDialogState
-                    }
+                     }
                 }
             }
             RowLayout {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignHCenter
+                Layout.alignment: Qt.AlignLeft
+                Layout.topMargin: 32
                 spacing: 16
-                visible: true
+                visible: root.thisAgentAuthState !== "REFRESHED"
                 ColumnLayout {
                     Layout.fillWidth: true
                     Label {
-                        id: loginurlLabel
+                        id: loginUrlLabel
                         font.pixelSize: 28
-                        color: '#080C0F'
+                        color: 'white'
                         text: "Login url:"
                     }
                     Label {
-                        id: logincodeLabel
+                        id: loginCodeLabel
                         font.pixelSize: 28
-                        color: '#080C0F'
+                        color: 'white'
                         text: "Login code:"
                     }
                 }
                 ColumnLayout {
                     Layout.fillWidth: true
                     Label {
-                        id: urlLabel
+                        id: loginUrlValue
                         font.pixelSize: 28
                         color: root.tokenValid? '#848286':'#0DF9FF'
                         text: thisAgentLoginUrl
                     }
                     Label {
-                        id: codeLabel
+                        id: loginCodeValue
                         font.pixelSize: 28
                         color: root.tokenValid? '#848286':'#0DF9FF'
                         text: thisAgentLoginCode
                     }
                 }
             }
-            Label {
-                font.pixelSize: 18
-                visible: root.tokenValid
-                text: "You can use the supplied login data to enable "+thisAgentName+"."
+            RowLayout {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 8
+                Layout.bottomMargin: 8
+
+                QtQrCode {
+                    /*
+                     * FIXME: Generated URL is currently Alexa-specific, work around for
+                     *        now by checking agent name and only displaying for Alexa.
+                     */
+                    data: root.thisAgentLoginUrl + '?cbl-code=' + root.thisAgentLoginCode
+                    visible: root.thisAgentName === "Alexa" && root.thisAgentAuthState !== "REFRESHED" && root.tokenValid
+                    background: 'white'
+                    margin: 16
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                }
             }
             Label {
+                id: instructions
                 font.pixelSize: 18
-                visible: !root.tokenValid
-                text: "The current login data is not valid. Press 'UPDATE' to refresh."
+
+                states: [
+                    State {
+                        name: "HAVE_TOKEN"
+                        when: root.thisAgentAuthState !== "REFRESHED" && root.tokenValid
+                        PropertyChanges {
+                            target: instructions
+                            text: "You can use the supplied login data to enable "+thisAgentName+"."
+                            visible: true
+                        }
+                    },
+                    State {
+                        name: "NEED_TOKEN"
+                        when: root.thisAgentAuthState !== "REFRESHED" && !root.tokenValid
+                        PropertyChanges {
+                            target: instructions
+                            text: "The current login data is not valid. Press 'UPDATE' to refresh."
+                            visible: true
+                        }
+                    },
+                    State {
+                        name: "AUTHORIZED"
+                        when: root.thisAgentAuthState === "REFRESHED"
+                        PropertyChanges {
+                            target: instructions
+                            visible: false
+                        }
+                    }
+                ]
             }
         }
     }
