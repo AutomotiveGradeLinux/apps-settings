@@ -41,12 +41,10 @@ SettingPage {
                     text: service
                     color: '#66FF99'
                     font.pixelSize: 38
-                    font.bold: sstate === "ready"
-                               || sstate === "online"
+                    font.bold: sstate === "ready" || sstate === "online"
                 }
                 Label {
-                    visible: sstate === "ready"
-                             || sstate === "online"
+                    visible: sstate === "ready" || sstate === "online"
                     text: "connected, " + address
                     font.pixelSize: 18
                     color: "white"
@@ -56,8 +54,7 @@ SettingPage {
                 anchors.left: networkName.right
                 anchors.leftMargin: 50
                 Button {
-                    visible: sstate === "ready"
-                             || sstate === "online"
+                    visible: sstate === "ready" || sstate === "online"
                     font.pixelSize: 18
                     text: "CONFIGURE"
                     onClicked: {
@@ -76,7 +73,7 @@ SettingPage {
                        maxpwidth: 744
                        maxpheight: 744
                        xpos: (parent.width - maxpwidth)/2
-                       ypos: (parent.height - maxpheight)
+                       ypos: (parent.height - maxpheight)/2
                        serviceName: service
                        activeAddress: address
                        activeNetmask: sroute[2]

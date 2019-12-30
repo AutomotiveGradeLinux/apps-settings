@@ -73,9 +73,9 @@ ApplicationWindow {
 
         Wired {}
 
-        Version {}
-
         Voice {}
+
+        Version {}
     }
 }
 }

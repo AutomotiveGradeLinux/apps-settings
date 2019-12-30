@@ -24,6 +24,7 @@
 #include <QtQml/QQmlContext>
 #include <QtQuickControls2/QQuickStyle>
 #include <QQuickWindow>
+#include <QtQrCodeQuickItem.hpp>
 #include <libhomescreen.hpp>
 #include <bluetooth.h>
 #include <network.h>
@@ -115,6 +116,7 @@ int main(int argc, char *argv[])
         qWarning() << aglversion.errorString();
     }
 
+    QtQrCodeQuickItem::registerQmlTypes();
     engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddressWS, context));
     engine.rootContext()->setContextProperty("voice", new Voice(bindingAddressWS, context));
     engine.rootContext()->setContextProperty(QStringLiteral("screenInfo"), &screenInfo);

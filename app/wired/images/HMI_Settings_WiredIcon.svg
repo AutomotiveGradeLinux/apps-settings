@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Generator: Adobe Illustrator 21.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!-- Generator: Adobe Illustrator 21.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 
 <svg
-   xmlns:i="&amp;ns_ai;"
+   xmlns:i="&amp;#38;#38;ns_ai;"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -11,18 +11,19 @@
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    version="1.1"
-   id="Layer_1"
+   id="Radio_Inactive"
    x="0px"
    y="0px"
-   viewBox="0 0 100 100"
-   style="enable-background:new 0 0 100 100;"
+   viewBox="0 0 300 300"
    xml:space="preserve"
-   inkscape:version="0.91 r13725"
-   sodipodi:docname="HMI_Settings_WifiIcon.svg"><metadata
-     id="metadata20"><rdf:RDF><cc:Work
+   inkscape:version="0.92.4 (unknown)"
+   sodipodi:docname="foo.svg"
+   width="300"
+   height="300"><metadata
+     id="metadata5319"><rdf:RDF><cc:Work
          rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
-     id="defs18" /><sodipodi:namedview
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /><dc:title></dc:title></cc:Work></rdf:RDF></metadata><defs
+     id="defs5317" /><sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
      borderopacity="1"
@@ -31,31 +32,74 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="2560"
-     inkscape:window-height="1464"
-     id="namedview16"
+     inkscape:window-width="1920"
+     inkscape:window-height="1028"
+     id="namedview5315"
      showgrid="false"
-     inkscape:zoom="2.36"
-     inkscape:cx="-191.52542"
-     inkscape:cy="50"
+     inkscape:zoom="2"
+     inkscape:cx="33.503134"
+     inkscape:cy="121.68331"
      inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-y="27"
      inkscape:window-maximized="1"
-     inkscape:current-layer="Layer_1" /><style
+     inkscape:current-layer="g5196" /><style
      type="text/css"
-     id="style3">
+     id="style5192">
 	.st0{fill:#FFFFFF;}
+	.st1{font-family:'Roboto-Regular';}
+	.st2{font-size:25px;}
+	.st3{letter-spacing:6;}
+	.st4{fill:url(#SVGID_1_);}
+	.st5{fill:url(#SVGID_2_);}
+	.st6{fill:url(#SVGID_3_);}
+	.st7{fill:url(#SVGID_4_);}
+	.st8{fill:url(#SVGID_5_);}
+	.st9{fill:url(#SVGID_6_);}
+	.st10{fill:url(#SVGID_7_);}
+	.st11{fill:url(#SVGID_8_);}
+	.st12{fill:url(#SVGID_9_);}
+	.st13{fill:url(#SVGID_10_);}
+	.st14{fill:url(#SVGID_11_);}
+	.st15{fill:url(#SVGID_12_);}
+	.st16{fill:url(#SVGID_13_);}
 </style><switch
-     id="switch5"><g
+     id="switch5194"
+     transform="matrix(1.3307804,0,0,1.3314313,-62.924861,-27.94579)"><g
        i:extraneous="self"
-       id="g7"><g
-         id="Wifi_Icon"><path
-           class="st0"
-           d="M49.6,32.8c10.8-0.2,21.2,4.3,31,13.4l1.6-1.6C72,35,61,30.2,49.6,30.5c-15.2,0.4-26.9,9.4-31.8,13.9     l1.6,1.6C24.1,41.7,35.4,33.1,49.6,32.8z"
-           id="path10" /><path
-           class="st0"
-           d="M29,55.8l1.6,1.6c2.9-2.7,10.1-8.2,19.1-8.4c6.9-0.2,13.4,2.7,19.6,8.5L71,56c-6.7-6.3-13.9-9.4-21.3-9.2     C39.7,47,32.1,52.9,29,55.8z"
-           id="path12" /><path
-           class="st0"
-           d="M49.8,63.5c-4.7,0.1-8.2,3.3-9,4.2l1.6,1.6c0.7-0.7,3.6-3.4,7.5-3.5c2.6,0,5.3,1.2,7.7,3.7l1.6-1.6     C56.3,64.9,53.2,63.5,49.8,63.5z"
-           id="path14" /></g></g></switch></svg>
+       id="g5196"><path
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:5.40903657;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 72.08166,133.72511 h 175.83668 v 0"
+         id="path884"
+         inkscape:connector-curvature="0" /><path
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:5.40903657;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 160,132.06342 v -33.511789 0"
+         id="path886"
+         inkscape:connector-curvature="0" /><rect
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:5.40903657;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:44.50839996;stroke-opacity:1"
+         id="rect888"
+         width="40.577694"
+         height="30.418392"
+         x="139.71115"
+         y="66.128677" /><path
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:5.40903657;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 116.04083,135.75299 v 33.79822 0"
+         id="path886-3"
+         inkscape:connector-curvature="0" /><rect
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:5.40903657;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:44.50839996;stroke-opacity:1"
+         id="rect888-6"
+         width="40.577694"
+         height="30.418392"
+         x="-136.32968"
+         y="-202.67346"
+         transform="scale(-1)" /><path
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:5.40903657;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 203.95917,135.753 v 33.79821 0"
+         id="path886-3-7"
+         inkscape:connector-curvature="0" /><rect
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:5.40903657;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:44.50839996;stroke-opacity:1"
+         id="rect888-6-5"
+         width="40.577694"
+         height="30.418392"
+         x="-224.24802"
+         y="-202.67346"
+         transform="scale(-1)" /></g></switch></svg>

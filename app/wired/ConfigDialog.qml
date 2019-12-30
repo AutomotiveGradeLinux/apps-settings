@@ -69,7 +69,8 @@ Dialog {
 
     background: Rectangle {
         border.color : '#00ADDC'
-        color: 'transparent'
+        color: 'black'
+        opacity: 0.5
     }
 
     function setDefaultValues() {
@@ -141,7 +142,7 @@ Dialog {
                 Label {
                     id: nwLabel
                     font.pixelSize: 28
-                    color: '#080C0F'
+                    color: 'white'
                     text: "Network:"
                     Layout.preferredWidth: 200
                 }
@@ -161,7 +162,7 @@ Dialog {
                 Label {
                     id: ipvlabel
                     font.pixelSize: 28
-                    color: '#080C0F'
+                    color: 'white'
                     text: "IP version:"
                     Layout.preferredWidth: 200
                 }
@@ -206,7 +207,7 @@ Dialog {
                 Label {
                     id: modelabel
                     font.pixelSize: 28
-                    color: '#080C0F'
+                    color: 'white'
                     text: "Addressing:"
                     Layout.preferredWidth: 200
                 }
@@ -241,15 +242,20 @@ Dialog {
                     Label {
                         id: address
                         font.pixelSize: 28
-                        color: '#080C0F'
-                        text: "address:"
+                        color: 'white'
+                        text: "Address:"
                     }
                     TextArea {
                         id: m_customAddress
                         font.pixelSize: 28
+                        color: 'black'
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignLeft
                         placeholderText: activeAddress
+                        background: Rectangle {
+                            color: 'white'
+                            border.color: '#848286'
+                        }
                     }
                 }
                 ColumnLayout {
@@ -257,15 +263,20 @@ Dialog {
                     Label {
                         id: netmask
                         font.pixelSize: 28
-                        color: '#080C0F'
-                        text: "netmask:"
+                        color: 'white'
+                        text: "Netmask:"
                     }
                     TextArea {
                         id: m_customNetmask
                         font.pixelSize: 28
+                        color: 'black'
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignLeft
                         placeholderText: activeNetmask
+                        background: Rectangle {
+                            color: 'white'
+                            border.color: '#848286'
+                        }
                     }
                 }
                 ColumnLayout {
@@ -273,15 +284,20 @@ Dialog {
                     Label {
                         id: gateway
                         font.pixelSize: 28
-                        color: '#080C0F'
-                        text: "gateway:"
+                        color: 'white'
+                        text: "Gateway:"
                     }
                     TextArea {
                         id: m_customGateway
                         font.pixelSize: 28
+                        color: 'black'
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignLeft
                         placeholderText: activeGateway
+                        background: Rectangle {
+                            color: 'white'
+                            border.color: '#848286'
+                        }
                     }
                 }
             }
@@ -294,7 +310,7 @@ Dialog {
                 Label {
                     id: dnslabel
                     font.pixelSize: 28
-                    color: '#080C0F'
+                    color: 'white'
                     text: "DNS address:"
                     Layout.preferredWidth: 200
                 }
@@ -329,15 +345,20 @@ Dialog {
                     Label {
                         id: dnsList
                         font.pixelSize: 28
-                        color: '#080C0F'
+                        color: 'white'
                         text: "DNS list:"
                     }
                     TextArea {
                         id: m_customNSlist
                         font.pixelSize: 28
+                        color: 'black'
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignLeft
                         placeholderText: activeNSList
+                        background: Rectangle {
+                            color: 'white'
+                            border.color: '#848286'
+                        }
                     }
                 }
             }

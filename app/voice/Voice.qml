@@ -27,62 +27,12 @@ SettingPage {
     title: 'Voice'
     readonly property bool isVoice: true
 
-    Rectangle {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.top
-        anchors.margins: 80
-        width: 110
-        color: "#222"
-        border.color: "white"
-
-        Button {
-            id: buttonScan
-            anchors.centerIn: parent
-            anchors.margins: 10
-            text: enabled? "SCAN" : "PROCESSING"
-            visible: true
-            enabled: true
-
-            Timer {
-               id: scanAnimationTimer
-                interval: 3000
-                running: false
-                repeat: false
-                onTriggered: {
-                    buttonScan.enabled = true
-                }
-            }
-            MouseArea {
-                anchors.fill: parent
-
-                onClicked: {
-                    voice.scan()
-                    buttonScan.enabled = false
-                    scanAnimationTimer.start()
-                }
-            }
-        }
-    }
-
     Component {
         id: voiceAgent
         MouseArea {
             height: 120
             width: ListView.view.width
             Column {
-	        anchors.left: parent.left
-		anchors.leftMargin: 5
-		id: agentId
-		Label {
-		    id: agentIdText
-		    text: id
-                    color: '#66FF99'
-                    font.pixelSize: 38
-                    font.bold: active === "active"
-                }
-            }
-            Column {
-                anchors.left: agentId.right
                 anchors.leftMargin: 100
                 id: agentName
                 Label {
@@ -112,10 +62,11 @@ SettingPage {
                        maxpwidth: 744
                        maxpheight: 744
                        xpos: (parent.width - maxpwidth)/2
-                       ypos: (parent.height - maxpheight)
+                       ypos: (parent.height - maxpheight)/2
                        thisAgentName: name
                        thisAgentId: id
 		       thisAgentWuW: wuw
+		       thisAgentVendor: vendor
 		       thisAgentAuthState: authstate
                        thisAgentConnState: connstate
                        thisAgentDialogState: dialogstate
