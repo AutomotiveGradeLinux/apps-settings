@@ -219,7 +219,7 @@ Dialog {
                      * FIXME: Generated URL is currently Alexa-specific, work around for
                      *        now by checking agent name and only displaying for Alexa.
                      */
-                    data: root.thisAgentLoginUrl + '?cbl-code=' + root.thisAgentLoginCode
+                    data: "%1?cbl-code=%2".arg(root.thisAgentLoginUrl).arg(root.thisAgentLoginCode)
                     visible: root.thisAgentName === "Alexa" && root.thisAgentAuthState !== "REFRESHED" && root.tokenValid
                     background: 'white'
                     margin: 16
