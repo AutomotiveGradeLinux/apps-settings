@@ -39,8 +39,8 @@ ApplicationWindow {
     Item {
         id: container
         anchors.centerIn: parent
-        width: Screen.width
-        height: Screen.height
+        width: Window.width
+        height: Window.height
         scale: 1
 
     StackView {
