@@ -4,7 +4,7 @@ QT = quickcontrols2 websockets
 SOURCES = main.cpp
 
 CONFIG += link_pkgconfig
-PKGCONFIG += libhomescreen qlibwindowmanager qtappfw qtqrcode-quickitem
+PKGCONFIG += libhomescreen qlibwindowmanager qtappfw-network qtappfw-bt qtappfw-voice qtqrcode-quickitem
 
 RESOURCES += \
     settings.qrc \
