@@ -6,6 +6,10 @@ SOURCES = main.cpp
 CONFIG += link_pkgconfig
 PKGCONFIG += libhomescreen qlibwindowmanager qtappfw-network qtappfw-bt qtappfw-voice qtqrcode-quickitem
 
+CONFIG(release, debug|release) {
+    QMAKE_POST_LINK = $(STRIP) --strip-unneeded $(TARGET)
+}
+
 RESOURCES += \
     settings.qrc \
     images/images.qrc \

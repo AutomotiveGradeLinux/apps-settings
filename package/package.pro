@@ -15,7 +15,12 @@ DISTFILES = icon.svg config.xml
     PRE_TARGETDEPS += $$copy_config.target
 }
 
+WGT_TYPE =
+CONFIG(debug, debug|release) {
+    WGT_TYPE = -debug
+}
+
 wgt.target = package
-wgt.commands = wgtpkg-pack -f -o settings.wgt root
+wgt.commands = wgtpkg-pack -f -o settings$${WGT_TYPE}.wgt root
 
 QMAKE_EXTRA_TARGETS += wgt
