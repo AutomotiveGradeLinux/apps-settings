@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Qt Company Ltd.
- * Copyright (C) 2017 Konsulko Group
+ * Copyright (C) 2017,2020 Konsulko Group
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@
 #include <QtQuickControls2/QQuickStyle>
 #include <QQuickWindow>
 #include <QtQrCodeQuickItem.hpp>
-#include <libhomescreen.hpp>
 #include <bluetooth.h>
 #include <network.h>
 #include <voice.h>
