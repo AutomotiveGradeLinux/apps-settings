@@ -24,7 +24,6 @@ import 'bluetooth'
 import 'wifi'
 import 'wired'
 import 'version'
-import 'voice'
 
 ApplicationWindow {
     id: root
@@ -73,8 +72,6 @@ ApplicationWindow {
         Wifi {}
 
         Wired {}
-
-        Voice {}
 
         Version {}
     }

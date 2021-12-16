@@ -1,14 +1,11 @@
+TEMPLATE = app
 TARGET = settings
-QT = quickcontrols2 websockets
+QT = qml quickcontrols2
+CONFIG += c++11 link_pkgconfig
+
+PKGCONFIG += qtappfw-network qtappfw-bt
 
 SOURCES = main.cpp
-
-CONFIG += link_pkgconfig
-PKGCONFIG += qtappfw-network qtappfw-bt qtappfw-voice qtqrcode-quickitem
-
-CONFIG(release, debug|release) {
-    QMAKE_POST_LINK = $(STRIP) --strip-unneeded $(TARGET)
-}
 
 RESOURCES += \
     settings.qrc \
@@ -17,7 +14,10 @@ RESOURCES += \
     wifi/wifi.qrc \
     wired/wired.qrc \
     bluetooth/bluetooth.qrc \
-    version/version.qrc \
-    voice/voice.qrc
+    version/version.qrc
 
-include(app.pri)
+target.path = $${PREFIX}/usr/bin
+target.files += $${OUT_PWD}/$${TARGET}
+target.CONFIG = no_check_exist executable
+
+INSTALLS += target

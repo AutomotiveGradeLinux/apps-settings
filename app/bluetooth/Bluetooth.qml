@@ -17,7 +17,6 @@
 import QtQuick 2.6
 import QtQuick.Layouts 1.1
 import QtQuick.Controls 2.0
-import QtWebSockets 1.0
 import '..'
 
 SettingPage {
@@ -27,13 +26,20 @@ SettingPage {
     checkable: true
     readonly property bool isBluetooth: true
 
+    Component.onCompleted : {
+        bluetooth.start()
+    }
+
     Connections {
         target: bluetooth
         onRequestConfirmationEvent: {
-            bluetooth.send_confirmation(data.pincode)
+            // If a dialog were to be display to confirm the PIN it
+            // could be triggered here.
+            bluetooth.send_confirmation(pincode)
         }
 
         onPowerChanged: {
+            console.log("onPowerChanged - state ", state)
             if (state) {
                 bluetooth.start_discovery()
                 bluetooth.discoverable = true;

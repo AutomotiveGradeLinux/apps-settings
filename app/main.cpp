@@ -24,10 +24,8 @@
 #include <QtQml/QQmlContext>
 #include <QtQuickControls2/QQuickStyle>
 #include <QQuickWindow>
-#include <QtQrCodeQuickItem.hpp>
 #include <bluetooth.h>
 #include <network.h>
-#include <voice.h>
 
 int main(int argc, char *argv[])
 {
@@ -45,39 +43,13 @@ int main(int argc, char *argv[])
 
     QQuickStyle::setStyle("AGL");
 
-    QCommandLineParser parser;
-    parser.addPositionalArgument("port", app.translate("main", "port for binding"));
-    parser.addPositionalArgument("secret", app.translate("main", "secret for binding"));
-    parser.addHelpOption();
-    parser.addVersionOption();
-    parser.process(app);
-    QStringList positionalArguments = parser.positionalArguments();
-
     QQmlApplicationEngine engine;
-    if (positionalArguments.length() != 2) {
-        exit(EXIT_FAILURE);
-    }
-    int port = positionalArguments.takeFirst().toInt();
-    QString secret = positionalArguments.takeFirst();
-    QUrlQuery query;
-    query.addQueryItem(QStringLiteral("token"), secret);
-
-    QUrl bindingAddressWS;
-    bindingAddressWS.setScheme(QStringLiteral("ws"));
-    bindingAddressWS.setHost(QStringLiteral("localhost"));
-    bindingAddressWS.setPort(port);
-    bindingAddressWS.setPath(QStringLiteral("/api"));
-    bindingAddressWS.setQuery(query);
     QQmlContext *context = engine.rootContext();
-    context->setContextProperty(QStringLiteral("bindingAddressWS"), bindingAddressWS);
-    context->setContextProperty("network", new Network(bindingAddressWS, context));
-
-    std::string token = secret.toStdString();
 
     QFile version("/proc/version");
     if (version.open(QFile::ReadOnly)) {
         QStringList data = QString::fromLocal8Bit(version.readAll()).split(QLatin1Char(' '));
-        engine.rootContext()->setContextProperty("kernel", data.at(2));
+        context->setContextProperty("kernel", data.at(2));
         version.close();
     } else {
         qWarning() << version.errorString();
@@ -87,15 +59,14 @@ int main(int argc, char *argv[])
     if (aglversion.open(QFile::ReadOnly)) {
         QStringList data = QString::fromLocal8Bit(aglversion.readAll()).split(QLatin1Char('\n'));
         QStringList data2 = data.at(2).split(QLatin1Char('"'));
-        engine.rootContext()->setContextProperty("ucb", data2.at(1));
+        context->setContextProperty("ucb", data2.at(1));
         aglversion.close();
     } else {
         qWarning() << aglversion.errorString();
     }
 
-    QtQrCodeQuickItem::registerQmlTypes();
-    engine.rootContext()->setContextProperty("bluetooth", new Bluetooth(bindingAddressWS, context));
-    engine.rootContext()->setContextProperty("voice", new Voice(bindingAddressWS, context));
+    context->setContextProperty("bluetooth", new Bluetooth(true, context));
+    context->setContextProperty("network", new Network(true, context));
 
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));
 
