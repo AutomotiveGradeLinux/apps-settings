@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=Settings
+Comment=Settings
+GenericName=Settings
+Exec=settings
+Icon=settings
+Terminal=false
+Type=Application
+Categories=System;
+StartupNotify=true
