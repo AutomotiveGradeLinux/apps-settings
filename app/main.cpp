@@ -66,7 +66,21 @@ int main(int argc, char *argv[])
     }
 
     context->setContextProperty("bluetooth", new Bluetooth(true, context));
-    context->setContextProperty("network", new Network(true, context));
+
+    // Use the network API interface to enable Bluetooth via ConnMan, thus
+    // deactivating the default rfkill state and persisting the new one across
+    // reboots (since ConnMan will restore the enabled state on boot).
+    // This used to be done in the agl-service-bluetooth binding, doing it
+    // here should be considered a likely temporary placeholder for further
+    // investigation into Bluetooth device management in future AGL releases.
+    // At the moment device auto-connection is not likely to match pre-Marlin
+    // releases unless a device manages to connect on its own versus the
+    // active auto-connect that was in agl-service-bluetooth.  The latter is
+    // now dependent on this application being run until further re-architecting
+    // takes place.
+    Network *network = new Network(true, context);
+    network->power(true, QString("bluetooth"));
+    context->setContextProperty("network", network);
 
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));
 
