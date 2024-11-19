@@ -111,7 +111,7 @@ SettingPage {
             }
 
             Image {
-                source: '../images/HMI_Settings_DividingLine.svg'
+                source: 'qrc:/images/HMI_Settings_DividingLine.svg'
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: parent.top
                 anchors.topMargin: -15

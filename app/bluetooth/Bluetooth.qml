@@ -199,7 +199,7 @@ SettingPage {
           anchors.left: parent.left
           anchors.leftMargin: 80
           height: 5
-          source: (bluetooth.power === true && pairedListView.count) ? '../images/HMI_Settings_DividingLine.svg':''
+          source: (bluetooth.power === true && pairedListView.count) ? 'qrc:/images/HMI_Settings_DividingLine.svg':''
       }
       Text {
           id: detectedlabel

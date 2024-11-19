@@ -30,7 +30,7 @@ GridLayout {
 
     ImageButton {
         Layout.alignment: Layout.Center
-        offImage: './images/HMI_Settings_TimeDate_Arrow_Up.svg'
+        offImage: 'qrc:/images/HMI_Settings_TimeDate_Arrow_Up.svg'
         onClicked: hourControl.currentIndex++
     }
     Tumbler {
@@ -40,7 +40,7 @@ GridLayout {
     }
     ImageButton {
         Layout.alignment: Layout.Center
-        offImage: './images/HMI_Settings_TimeDate_Arrow_Down.svg'
+        offImage: 'qrc:/images/HMI_Settings_TimeDate_Arrow_Down.svg'
         onClicked: hourControl.currentIndex--
     }
 
@@ -50,7 +50,7 @@ GridLayout {
 
     ImageButton {
         Layout.alignment: Layout.Center
-        offImage: './images/HMI_Settings_TimeDate_Arrow_Up.svg'
+        offImage: 'qrc:/images/HMI_Settings_TimeDate_Arrow_Up.svg'
         onClicked: minutesControl.currentIndex++
     }
 
@@ -62,13 +62,13 @@ GridLayout {
 
     ImageButton {
         Layout.alignment: Layout.Center
-        offImage: './images/HMI_Settings_TimeDate_Arrow_Down.svg'
+        offImage: 'qrc:/images/HMI_Settings_TimeDate_Arrow_Down.svg'
         onClicked: minutesControl.currentIndex--
     }
 
     ImageButton {
         Layout.alignment: Layout.Center
-        offImage: './images/HMI_Settings_TimeDate_Arrow_Up.svg'
+        offImage: 'qrc:/images/HMI_Settings_TimeDate_Arrow_Up.svg'
         onClicked: ampmControl.currentIndex++
     }
 
@@ -80,7 +80,7 @@ GridLayout {
 
     ImageButton {
         Layout.alignment: Layout.Center
-        offImage: './images/HMI_Settings_TimeDate_Arrow_Down.svg'
+        offImage: 'qrc:/images/HMI_Settings_TimeDate_Arrow_Down.svg'
         onClicked: ampmControl.currentIndex--
     }
 }

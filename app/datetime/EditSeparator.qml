@@ -30,7 +30,7 @@ ColumnLayout {
             Layout.fillHeight: true
             Layout.preferredHeight: 2
             Layout.alignment: Layout.Center
-            source: './images/HMI_Settings_TimeDate_Arrow_DividingLine.svg'
+            source: 'qrc:/images/HMI_Settings_TimeDate_Arrow_DividingLine.svg'
         }
     }
     Item {

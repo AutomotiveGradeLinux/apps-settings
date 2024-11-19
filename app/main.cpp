@@ -78,9 +78,10 @@ int main(int argc, char *argv[])
     // active auto-connect that was in agl-service-bluetooth.  The latter is
     // now dependent on this application being run until further re-architecting
     // takes place.
-    Network *network = new Network(true, context);
-    network->power(true, QString("bluetooth"));
-    context->setContextProperty("network", network);
+    // Network *network = new Network(true, context);
+    // network->power(true, QString("bluetooth"));
+    QObject *network = new QObject(context); // prevent crash
+    context->setContextProperty("network", network);    
 
     engine.load(QUrl(QStringLiteral("qrc:/Settings.qml")));
 

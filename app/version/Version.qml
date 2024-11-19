@@ -40,7 +40,7 @@ SettingPage {
             clip: true
             Image {
                 anchors.centerIn: parent
-                source: './images/agl_slide_0.png'
+                source: 'qrc:/images/agl_slide_0.png'
                 z: -1
                 opacity: 0.5
             }

@@ -31,7 +31,7 @@ SettingPage {
         Label { text: 'Date'}
         DateEdit {}
         Image {
-            source: '../images/HMI_Settings_DividingLine.svg'
+            source: 'qrc:/images/HMI_Settings_DividingLine.svg'
         }
         Label { text: 'Time'}
         TimeEdit {}

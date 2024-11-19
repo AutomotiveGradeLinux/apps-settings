@@ -30,7 +30,7 @@ GridLayout {
 
     ImageButton {
         Layout.alignment: Layout.Center
-        offImage: './images/HMI_Settings_TimeDate_Arrow_Up.svg'
+        offImage: 'qrc:/images/HMI_Settings_TimeDate_Arrow_Up.svg'
         onClicked: monthControl.currentIndex++
     }
     Tumbler {
@@ -43,7 +43,7 @@ GridLayout {
     }
     ImageButton {
         Layout.alignment: Layout.Center
-        offImage: './images/HMI_Settings_TimeDate_Arrow_Down.svg'
+        offImage: 'qrc:/images/HMI_Settings_TimeDate_Arrow_Down.svg'
         onClicked: monthControl.currentIndex--
     }
 
@@ -53,7 +53,7 @@ GridLayout {
 
     ImageButton {
         Layout.alignment: Layout.Center
-        offImage: './images/HMI_Settings_TimeDate_Arrow_Up.svg'
+        offImage: 'qrc:/images/HMI_Settings_TimeDate_Arrow_Up.svg'
         onClicked: dayControl.currentIndex++
     }
 
@@ -91,13 +91,13 @@ GridLayout {
 
     ImageButton {
         Layout.alignment: Layout.Center
-        offImage: './images/HMI_Settings_TimeDate_Arrow_Down.svg'
+        offImage: 'qrc:/images/HMI_Settings_TimeDate_Arrow_Down.svg'
         onClicked: dayControl.currentIndex--
     }
 
     ImageButton {
         Layout.alignment: Layout.Center
-        offImage: './images/HMI_Settings_TimeDate_Arrow_Up.svg'
+        offImage: 'qrc:/images/HMI_Settings_TimeDate_Arrow_Up.svg'
         onClicked: yearControl.currentIndex++
     }
 
@@ -116,7 +116,7 @@ GridLayout {
 
     ImageButton {
         Layout.alignment: Layout.Center
-        offImage: './images/HMI_Settings_TimeDate_Arrow_Down.svg'
+        offImage: 'qrc:/images/HMI_Settings_TimeDate_Arrow_Down.svg'
         onClicked: yearControl.currentIndex--
     }
 }

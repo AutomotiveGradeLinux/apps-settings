@@ -52,7 +52,7 @@ Page {
         ImageButton {
             id: back
             anchors.bottom: parent.bottom
-            offImage: '../images/HMI_Settings_X.svg'
+            offImage: 'qrc:/images/HMI_Settings_X.svg'
             onClicked: root.done()
         }
     }
